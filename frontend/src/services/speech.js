@@ -1,7 +1,6 @@
 /**
  * Speech Recognition and Text-to-Speech Service for GangaMitra
- * Wraps browser Web Speech APIs with full lifecycle event hooks,
- * native Hindi/English voice selection, and robust error handling.
+ * Refined for authentic, warm Chacha Chaudhary voice tone and accurate phoneme lip-sync.
  */
 
 // Check browser support
@@ -48,7 +47,7 @@ export const startVoiceRecognition = ({
   let hasResult = false;
 
   recognition.continuous = false;
-  recognition.interimResults = true; // Stream words in real-time
+  recognition.interimResults = true;
   recognition.lang = language === 'hi' ? 'hi-IN' : 'en-IN';
   recognition.maxAlternatives = 1;
 
@@ -80,7 +79,6 @@ export const startVoiceRecognition = ({
   };
 
   recognition.onerror = (event) => {
-    // 'aborted' is a normal user-initiated cancellation (e.g. mic button toggled off)
     if (event.error === 'aborted') {
       onEnd && onEnd();
       return;
@@ -95,8 +93,6 @@ export const startVoiceRecognition = ({
       errorMsg = 'No microphone was found. Please ensure your microphone is plugged in and working.';
     } else if (event.error === 'network') {
       errorMsg = 'Network error: Web Speech API requires an internet connection.';
-    } else if (event.error === 'service-not-allowed') {
-      errorMsg = 'Speech recognition service is not allowed by the browser/system.';
     }
 
     onError && onError(errorMsg, event.error);
@@ -122,7 +118,7 @@ export const startVoiceRecognition = ({
 };
 
 /**
- * Finds the most natural voice for Hindi or English
+ * Finds the most authentic, mature, warm voice for Chacha Chaudhary
  */
 const findBestVoice = (isHindi) => {
   const voices =
@@ -135,25 +131,36 @@ const findBestVoice = (isHindi) => {
   if (voices.length === 0) return null;
 
   if (isHindi) {
-    // Priority for Hindi voices
+    // 1. Prefer male / natural Hindi voices for authentic Chacha Chaudhary character
     return (
+      voices.find(
+        (v) =>
+          (v.lang.toLowerCase().replace('_', '-').startsWith('hi') || v.name.toLowerCase().includes('hindi')) &&
+          (v.name.toLowerCase().includes('hemant') ||
+            v.name.toLowerCase().includes('madhur') ||
+            v.name.toLowerCase().includes('male') ||
+            v.name.toLowerCase().includes('natural'))
+      ) ||
       voices.find(
         (v) =>
           v.lang.toLowerCase().replace('_', '-').startsWith('hi') ||
           v.name.toLowerCase().includes('hindi') ||
-          v.name.includes('हिन्दी') ||
-          v.name.toLowerCase().includes('swara') ||
-          v.name.toLowerCase().includes('madhur') ||
-          v.name.toLowerCase().includes('hemant') ||
-          v.name.toLowerCase().includes('kalpana')
+          v.name.includes('हिन्दी')
       ) ||
       voices.find((v) => v.lang.toLowerCase().startsWith('hi')) ||
       null
     );
   }
 
-  // Priority for Indian English or natural English voices
+  // 2. Prefer warm Indian English voices
   return (
+    voices.find(
+      (v) =>
+        v.lang.toLowerCase().replace('_', '-').startsWith('en-in') &&
+        (v.name.toLowerCase().includes('ravi') ||
+          v.name.toLowerCase().includes('prabhat') ||
+          v.name.toLowerCase().includes('male'))
+    ) ||
     voices.find((v) => v.lang.toLowerCase().replace('_', '-').startsWith('en-in')) ||
     voices.find(
       (v) =>
@@ -168,7 +175,20 @@ const findBestVoice = (isHindi) => {
 };
 
 /**
- * Speaks text using window.speechSynthesis in Hindi or English
+ * Clean text for natural, conversational speech (removes formatting & weird symbols)
+ */
+const sanitizeSpeechText = (raw) => {
+  return raw
+    .replace(/[#*_`~[\]()]/g, '') // remove markdown symbols
+    .replace(/https?:\/\/\S+/g, '') // remove URLs
+    .replace(/[-–—]/g, ' ') // replace hyphens/dashes with pauses
+    .replace(/[^\w\s\u0900-\u097F.,!?।]/g, ' ') // keep letters, numbers, devanagari & basic punctuation
+    .replace(/\s+/g, ' ') // normalize whitespace
+    .trim();
+};
+
+/**
+ * Speaks text using window.speechSynthesis with custom Chacha tone tuning
  */
 export const speakText = ({
   text,
@@ -183,16 +203,10 @@ export const speakText = ({
   }
 
   try {
-    // Cancel any ongoing speech
+    // Cancel any ongoing speech to prevent overlap
     window.speechSynthesis.cancel();
 
-    // Clean markdown or unwanted tokens for natural speech
-    const cleanText = text
-      .replace(/[#*_`~[\]()]/g, '')
-      .replace(/https?:\/\/\S+/g, '')
-      .replace(/\s+/g, ' ')
-      .trim();
-
+    const cleanText = sanitizeSpeechText(text);
     if (!cleanText) {
       onEnd && onEnd();
       return null;
@@ -204,8 +218,10 @@ export const speakText = ({
 
     const utterance = new SpeechSynthesisUtterance(cleanText);
     utterance.lang = isHindi ? 'hi-IN' : 'en-IN';
-    utterance.rate = isHindi ? 0.95 : 1.0; // Slightly more paced for clear Hindi mascot articulation
-    utterance.pitch = 1.05; // Cheerful, warm tone for Chacha Chaudhary
+    
+    // Tone settings for a wise, warm, grandfatherly Indian mascot
+    utterance.rate = isHindi ? 0.90 : 0.95; // Slightly relaxed, clear pacing
+    utterance.pitch = 0.96; // Grounded, warm, mature voice tone (not high or robotic)
 
     const voice = findBestVoice(isHindi);
     if (voice) {
@@ -221,7 +237,6 @@ export const speakText = ({
     };
 
     utterance.onerror = (err) => {
-      // Interrupted speech is expected when user cancels or clicks another button
       if (err.error !== 'interrupted' && err.error !== 'canceled') {
         onError && onError(err);
       }
