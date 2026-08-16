@@ -4,7 +4,7 @@ const knowledgeService = require('./knowledge.service');
 
 class AIService {
   constructor() {
-    this.provider = env.AI_PROVIDER || 'gemini';
+    this.primaryProvider = env.AI_PROVIDER || 'groq';
   }
 
   /**
@@ -20,7 +20,7 @@ class AIService {
 1. राष्ट्रीय नदी गंगा की पवित्रता, पारिस्थितिकी और जैव विविधता (जैसे गंगा डॉल्फिन, घड़ियाल) के बारे में जागरूकता फैलाना।
 2. नमामि गंगे की प्रमुख परियोजनाओं, सीवेज उपचार संयंत्रों (STPs), और घाट स्वच्छता के बारे में जानकारी देना।
 3. छात्रों, नागरिकों और उद्योगों को गंगा को स्वच्छ रखने के व्यावहारिक उपाय बताना।
-4. उत्तर सरल, प्रेरणादायक, विनम्र और स्पष्ट हिंदी में दें।`;
+4. उत्तर सरल, प्रेरणादायक, विनम्र और स्पष्ट हिंदी में दें। अनावश्यक बड़े पैराग्राफ से बचें और बातचीत की शैली में उत्तर दें।`;
     }
 
     return `You are "GangaMitra" - the official digital avatar and AI mascot based on the legendary "Chacha Chaudhary" for the Namami Gange Rejuvenation Programme.
@@ -29,7 +29,7 @@ Your Mission:
 1. Spread awareness regarding River Ganga's ecology, biodiversity (such as the endangered Ganges River Dolphin and Gharials), and cultural heritage.
 2. Provide authentic information on Namami Gange initiatives, sewage treatment plants (STPs), river surface cleaning, and community afforestation.
 3. Guide students, citizens, and companies on how to prevent pollution and participate in river cleanup drives.
-4. Keep answers engaging, encouraging, scientifically grounded, and easy to understand.`;
+4. Keep answers engaging, encouraging, scientifically grounded, concise, and conversational.`;
   }
 
   /**
@@ -101,7 +101,7 @@ Your Mission:
   }
 
   /**
-   * Groq Provider Implementation
+   * Groq Provider Implementation with LLaMA 3.1
    */
   async callGroq(prompt) {
     if (!env.GROQ_API_KEY) {
@@ -148,7 +148,7 @@ Your Mission:
   }
 
   /**
-   * Fallback mock generator when API keys are not provided
+   * Fallback mock generator when all external AI APIs fail
    */
   getFallbackResponse(userMessage, contextArticles = [], language = 'en') {
     const isHindi = language === 'hi';
@@ -157,27 +157,30 @@ Your Mission:
     if (contextArticles.length > 0) {
       const primary = contextArticles[0];
       if (isHindi) {
-        return `नमस्ते! मैं चाचा चौधरी हूँ। आपके सवाल के अनुसार, हमारे ज्ञानकोष से जानकारी:\n\n${primary.content}\n\nगंगा को स्वच्छ और निर्मल रखने में अपना योगदान दें!`;
+        return `नमस्ते! मैं चाचा चौधरी हूँ। हमारे ज्ञानकोष से जानकारी:\n\n${primary.content}\n\nमाँ गंगा को स्वच्छ और निर्मल रखने में अपना योगदान अवश्य दें!`;
       }
       return `Hello! Chacha Chaudhary here! Based on our Namami Gange knowledge repository:\n\n${primary.content}\n\nRemember, keeping Mother Ganga clean is the collective duty of every citizen!`;
     }
 
-    if (lower.includes('dolphin') || lower.includes('animal') || lower.includes('biodiversity')) {
+    if (lower.includes('dolphin') || lower.includes('animal') || lower.includes('biodiversity') || lower.includes('डॉल्फिन')) {
       if (isHindi) {
-        return `गंगा नदी भारत के राष्ट्रीय जलीय जीव 'गंगा डॉल्फिन' का घर है! हमें नदी को प्रदूषण मुक्त रखना चाहिए ताकि ये दुर्लभ जीव सुरक्षित रह सकें।`;
+        return `गंगा नदी भारत के राष्ट्रीय जलीय जीव 'गंगा डॉल्फिन' का घर है! नमामि गंगे मिशन के तहत इनके संरक्षण के लिए विशेष कदम उठाए जा रहे हैं।`;
       }
       return `River Ganga is home to the precious Ganges River Dolphin (Platanista gangetica), India's National Aquatic Animal! Protecting their habitat is a primary focus of the Namami Gange mission.`;
     }
 
     if (isHindi) {
-      return `नमस्ते! मैं आपका गंगा मित्र (चाचा चौधरी)। गंगा नदी के संरक्षण, नमामि गंगे परियोजनाओं और नदी स्वच्छता के बारे में आप जो भी पूछना चाहें, पूछ सकते हैं!`;
+      return `नमस्ते! मैं आपका गंगा मित्र (चाचा चौधरी)। गंगा नदी के इतिहास, नमामि गंगे मिशन, सीवेज ट्रीटमेंट और जलीय जीवों के बारे में आप जो भी पूछना चाहें, पूछ सकते हैं!`;
     }
 
-    return `Hello there! I am your GangaMitra (Chacha Chaudhary). As you know, my brain works faster than a computer! Ask me anything about River Ganga, river ecology, pollution prevention, or the Namami Gange flagship initiatives.`;
+    return `Hello there! I am your GangaMitra (Chacha Chaudhary). Ask me anything about River Ganga, river ecology, pollution prevention, or the Namami Gange flagship initiatives.`;
   }
 
   /**
-   * Primary Chat Generation with RAG retrieval and Provider selection
+   * Primary Chat Generation with Automatic Multi-Tier Failover:
+   * 1. Try Primary Provider (Gemini or Groq)
+   * 2. If Primary fails (quota exceeded, 429, tokens exhausted, error), auto failover to Secondary Provider (Groq / Gemini)
+   * 3. If all fail, gracefully use RAG knowledge fallback
    */
   async generateResponse({ message, language = 'en' }) {
     // 1. Retrieve relevant knowledge base articles for RAG
@@ -191,35 +194,43 @@ Your Mission:
     // 2. Build augmented prompt
     const prompt = this.buildPrompt(message, sources, language);
 
-    // 3. Dispatch to selected AI provider
-    let answer = null;
-    let usedProvider = this.provider;
+    // 3. Determine order of execution for automatic failover
+    const primary = (env.AI_PROVIDER || 'groq').toLowerCase();
+    const providersToTry = [];
 
-    try {
-      if (this.provider === 'gemini' && env.GEMINI_API_KEY) {
-        answer = await this.callGemini(prompt);
-      } else if (this.provider === 'groq' && env.GROQ_API_KEY) {
-        answer = await this.callGroq(prompt);
-      } else if (env.GEMINI_API_KEY) {
-        answer = await this.callGemini(prompt);
-        usedProvider = 'gemini';
-      } else if (env.GROQ_API_KEY) {
-        answer = await this.callGroq(prompt);
-        usedProvider = 'groq';
-      } else {
-        logger.info('No AI API keys configured. Using mascot rule/knowledge fallback.');
-        answer = this.getFallbackResponse(message, sources, language);
-        usedProvider = 'fallback';
+    if (primary === 'groq') {
+      if (env.GROQ_API_KEY) providersToTry.push({ name: 'groq', fn: () => this.callGroq(prompt) });
+      if (env.GEMINI_API_KEY) providersToTry.push({ name: 'gemini', fn: () => this.callGemini(prompt) });
+    } else {
+      if (env.GEMINI_API_KEY) providersToTry.push({ name: 'gemini', fn: () => this.callGemini(prompt) });
+      if (env.GROQ_API_KEY) providersToTry.push({ name: 'groq', fn: () => this.callGroq(prompt) });
+    }
+
+    let answer = null;
+    let usedProvider = 'fallback';
+
+    for (const provider of providersToTry) {
+      try {
+        logger.info(`🤖 Attempting AI generation with [${provider.name}]...`);
+        answer = await provider.fn();
+        usedProvider = provider.name;
+        logger.info(`✅ AI response successfully generated by [${provider.name}]`);
+        break; // Success! Exit loop
+      } catch (err) {
+        logger.warn(`⚠️ Provider [${provider.name}] failed: ${err.message}. Trying next available provider...`);
       }
-    } catch (apiError) {
-      logger.error(`AI Provider error (${this.provider}): ${apiError.message}. Falling back.`);
+    }
+
+    // If all providers failed or no keys configured, use localized knowledge base fallback
+    if (!answer) {
+      logger.info('Using Namami Gange knowledge base fallback response.');
       answer = this.getFallbackResponse(message, sources, language);
       usedProvider = 'fallback';
     }
 
     return {
       answer,
-      sources: sources.map(s => ({
+      sources: sources.map((s) => ({
         id: s.id,
         title: s.title,
         category: s.category,
