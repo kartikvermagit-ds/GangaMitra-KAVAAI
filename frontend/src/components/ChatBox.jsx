@@ -1,5 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Send, Mic, MicOff, RotateCcw, Sparkles, MessageSquare, AlertCircle } from 'lucide-react';
+import { motion } from 'framer-motion';
+import { Send, Mic, MicOff, RotateCcw, Sparkles, MessageSquare, AlertCircle, Volume2 } from 'lucide-react';
 import { MessageBubble } from './MessageBubble';
 import { TypingIndicator } from './LoadingAnimation';
 import { useLanguage } from '../context/LanguageContext';
@@ -11,6 +12,7 @@ export const ChatBox = ({
   onResetChat,
   onMicToggle,
   isListening = false,
+  interimText = '',
   error = null,
 }) => {
   const { language, t } = useLanguage();
@@ -41,7 +43,7 @@ export const ChatBox = ({
 
   useEffect(() => {
     scrollToBottom();
-  }, [messages, isLoading]);
+  }, [messages, isLoading, isListening, interimText]);
 
   const handleSubmit = (e) => {
     e?.preventDefault();
@@ -51,7 +53,7 @@ export const ChatBox = ({
   };
 
   const handleSuggestionClick = (question) => {
-    if (isLoading) return;
+    if (isLoading || isListening) return;
     onSendMessage(question);
   };
 
@@ -67,7 +69,15 @@ export const ChatBox = ({
       {/* Chat Header */}
       <div className="px-5 py-4 bg-gradient-to-r from-ganga-700 to-ganga-900 text-white flex items-center justify-between shadow-sm">
         <div className="flex items-center gap-3">
-          <div className="w-3 h-3 rounded-full bg-emerald-400 animate-pulse" />
+          <div
+            className={`w-3 h-3 rounded-full ${
+              isListening
+                ? 'bg-rose-400 animate-ping'
+                : isLoading
+                ? 'bg-amber-400 animate-pulse'
+                : 'bg-emerald-400 animate-pulse'
+            }`}
+          />
           <div>
             <h2 className="font-bold text-sm sm:text-base leading-tight">
               {t('chat.title')}
@@ -98,8 +108,8 @@ export const ChatBox = ({
             </h3>
             <p className="text-xs sm:text-sm text-slate-500 max-w-sm mb-6">
               {language === 'hi'
-                ? 'गंगा नदी के इतिहास, जैव विविधता और नमामि गंगे संरक्षण के बारे में कोई भी प्रश्न पूछें।'
-                : 'Ask anything about Ganga history, river ecology, dolphins, pollution control and the Namami Gange mission.'}
+                ? 'गंगा नदी के इतिहास, जैव विविधता और नमामि गंगे संरक्षण के बारे में कोई भी प्रश्न पूछें या माइक दबाकर बोलें।'
+                : 'Ask anything about Ganga history, river ecology, dolphins, pollution control, or click the mic to speak!'}
             </p>
 
             {/* Suggested quick chips */}
@@ -114,7 +124,7 @@ export const ChatBox = ({
                     onClick={() => handleSuggestionClick(q)}
                     className="text-xs text-ganga-800 bg-white hover:bg-ganga-50 border border-slate-200 hover:border-ganga-300 rounded-xl px-3 py-2 text-left transition-all shadow-xs flex items-center gap-1.5"
                   >
-                    <Sparkles className="w-3 h-3 text-sacred-saffron shrink-0" />
+                    <Sparkles className="w-3.5 h-3.5 text-sacred-saffron shrink-0" />
                     <span>{q}</span>
                   </button>
                 ))}
@@ -139,6 +149,33 @@ export const ChatBox = ({
           </>
         )}
 
+        {/* Listening Active Wave Indicator in Chat Feed */}
+        {isListening && (
+          <motion.div
+            initial={{ opacity: 0, y: 5 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-center gap-3 p-3.5 bg-rose-50 border border-rose-200 text-rose-800 rounded-2xl text-xs font-semibold shadow-xs"
+          >
+            <div className="w-6 h-6 rounded-full bg-rose-200 text-rose-700 flex items-center justify-center animate-pulse">
+              <Mic className="w-3.5 h-3.5" />
+            </div>
+            <div className="flex-1">
+              <span>
+                {interimText
+                  ? `"${interimText}..."`
+                  : language === 'hi'
+                  ? 'चाचा सुन रहे हैं... कृपया बोलें'
+                  : 'Chacha is listening to you... speak now'}
+              </span>
+            </div>
+            <div className="flex items-center gap-1">
+              <span className="w-1.5 h-4 bg-rose-500 rounded-full animate-bounce [animation-delay:-0.3s]" />
+              <span className="w-1.5 h-6 bg-rose-500 rounded-full animate-bounce [animation-delay:-0.15s]" />
+              <span className="w-1.5 h-3 bg-rose-500 rounded-full animate-bounce" />
+            </div>
+          </motion.div>
+        )}
+
         {error && (
           <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-200 text-red-700 rounded-xl text-xs">
             <AlertCircle className="w-4 h-4 shrink-0" />
@@ -159,7 +196,7 @@ export const ChatBox = ({
             <button
               key={i}
               onClick={() => handleSuggestionClick(q)}
-              disabled={isLoading}
+              disabled={isLoading || isListening}
               className="shrink-0 bg-white hover:bg-ganga-50 text-slate-700 hover:text-ganga-800 border border-slate-200 px-2.5 py-1 rounded-lg text-xs transition truncate max-w-[200px]"
             >
               {q}
@@ -173,15 +210,20 @@ export const ChatBox = ({
         onSubmit={handleSubmit}
         className="p-3 sm:p-4 bg-white border-t border-slate-200 flex items-center gap-2"
       >
-        {/* Voice Microphone Button (Interactive demo ready) */}
+        {/* Real Web Speech Microphone Button */}
         <button
           type="button"
           onClick={onMicToggle}
-          title={isListening ? 'Stop listening' : 'Voice Input (Future Voice Mascot)'}
-          className={`p-2.5 rounded-2xl transition shadow-xs flex items-center justify-center shrink-0 ${
+          disabled={isLoading}
+          title={
             isListening
-              ? 'bg-red-500 text-white animate-pulse'
-              : 'bg-slate-100 text-slate-600 hover:bg-ganga-100 hover:text-ganga-700'
+              ? 'Click to stop listening'
+              : 'Click to speak to Chacha (Speech Recognition)'
+          }
+          className={`p-3 rounded-2xl transition shadow-xs flex items-center justify-center shrink-0 ${
+            isListening
+              ? 'bg-rose-500 text-white ring-4 ring-rose-200 animate-pulse'
+              : 'bg-slate-100 text-slate-700 hover:bg-rose-50 hover:text-rose-600 hover:border-rose-200 border border-transparent'
           }`}
         >
           {isListening ? <MicOff className="w-5 h-5" /> : <Mic className="w-5 h-5" />}
@@ -192,19 +234,29 @@ export const ChatBox = ({
           <input
             ref={inputRef}
             type="text"
-            value={inputMessage}
+            value={isListening && interimText ? interimText : inputMessage}
             onChange={(e) => setInputMessage(e.target.value)}
             onKeyDown={handleKeyDown}
-            disabled={isLoading}
-            placeholder={isListening ? t('chat.listening') : t('chat.inputPlaceholder')}
-            className="w-full pl-4 pr-3 py-3 bg-slate-100/80 border border-slate-200 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-ganga-500 focus:bg-white transition"
+            disabled={isLoading || isListening}
+            placeholder={
+              isListening
+                ? language === 'hi'
+                  ? '🎤 चाचा सुन रहे हैं... अपना प्रश्न बोलें'
+                  : '🎤 Chacha is listening to you... speak now'
+                : t('chat.inputPlaceholder')
+            }
+            className={`w-full pl-4 pr-3 py-3 rounded-2xl text-sm focus:outline-none focus:ring-2 focus:ring-ganga-500 transition ${
+              isListening
+                ? 'bg-rose-50/60 border-rose-300 text-rose-900 placeholder-rose-400 ring-2 ring-rose-200'
+                : 'bg-slate-100/80 border border-slate-200 focus:bg-white'
+            }`}
           />
         </div>
 
         {/* Send Button */}
         <button
           type="submit"
-          disabled={!inputMessage.trim() || isLoading}
+          disabled={!inputMessage.trim() || isLoading || isListening}
           className="p-3 rounded-2xl bg-ganga-600 hover:bg-ganga-700 disabled:opacity-40 disabled:hover:bg-ganga-600 text-white transition shadow-sm flex items-center justify-center shrink-0"
         >
           <Send className="w-4 h-4" />

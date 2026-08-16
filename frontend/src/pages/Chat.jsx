@@ -1,8 +1,14 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 import { Mascot } from '../components/Mascot';
 import { ChatBox } from '../components/ChatBox';
 import { sendMessageToChacha } from '../services/api';
+import {
+  startVoiceRecognition,
+  speakText,
+  stopSpeaking,
+  isSpeechRecognitionSupported,
+} from '../services/speech';
 import { useLanguage } from '../context/LanguageContext';
 import { Sparkles, MessageCircle, Info } from 'lucide-react';
 
@@ -20,21 +26,46 @@ export const Chat = () => {
     },
   ]);
 
-  const [mascotState, setMascotState] = useState('idle'); // 'idle' | 'thinking' | 'speaking' | 'happy' | 'celebrating'
+  const [mascotState, setMascotState] = useState('idle'); // 'idle' | 'listening' | 'thinking' | 'speaking' | 'happy' | 'celebrating'
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState(null);
   const [isListening, setIsListening] = useState(false);
+  const [interimSpeech, setInterimSpeech] = useState('');
   const [sessionId, setSessionId] = useState(null);
 
+  const recognitionRef = useRef(null);
+
+  // Stop any active speech/recognition when navigating away
+  useEffect(() => {
+    return () => {
+      stopSpeaking();
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.abort();
+        } catch (e) {}
+      }
+    };
+  }, []);
+
   const handleSendMessage = async (userText) => {
-    if (!userText.trim() || isLoading) return;
+    if (!userText || !userText.trim() || isLoading) return;
 
     setError(null);
+    setInterimSpeech('');
+
+    // Stop any ongoing speech playback or microphone session
+    stopSpeaking();
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.abort();
+      } catch (e) {}
+    }
+    setIsListening(false);
 
     // 1. Append user message
     const userMsgObj = {
       role: 'user',
-      content: userText,
+      content: userText.trim(),
       timestamp: new Date().toISOString(),
     };
 
@@ -45,7 +76,7 @@ export const Chat = () => {
     try {
       // 2. Call backend API
       const response = await sendMessageToChacha({
-        message: userText,
+        message: userText.trim(),
         language,
         sessionId,
       });
@@ -68,12 +99,21 @@ export const Chat = () => {
       };
 
       setMessages((prev) => [...prev, botMsgObj]);
-      setMascotState('speaking');
 
-      // Return to idle after speech finishes
-      setTimeout(() => {
-        setMascotState('idle');
-      }, 4000);
+      // 3. Trigger Text-to-Speech connected directly to mascot state
+      speakText({
+        text: answer,
+        language,
+        onStart: () => {
+          setMascotState('speaking');
+        },
+        onEnd: () => {
+          setMascotState('idle');
+        },
+        onError: () => {
+          setMascotState('idle');
+        },
+      });
     } catch (err) {
       console.error('Chat error:', err);
       setError(
@@ -88,6 +128,15 @@ export const Chat = () => {
   };
 
   const handleResetChat = () => {
+    stopSpeaking();
+    if (recognitionRef.current) {
+      try {
+        recognitionRef.current.abort();
+      } catch (e) {}
+    }
+    setIsListening(false);
+    setInterimSpeech('');
+
     setMessages([
       {
         role: 'assistant',
@@ -106,20 +155,70 @@ export const Chat = () => {
   };
 
   const handleMicToggle = () => {
-    if (!isListening) {
-      setIsListening(true);
-      // Simulate listening for voice demo
-      setTimeout(() => {
-        setIsListening(false);
-        const sampleQuery =
-          language === 'hi'
-            ? 'गंगा नदी में पाई जाने वाली डॉल्फिन के बारे में बताएं'
-            : 'Why is the Ganges river dolphin endangered?';
-        handleSendMessage(sampleQuery);
-      }, 2500);
-    } else {
+    if (isLoading) return; // Do not start listening while waiting for AI
+
+    // If currently speaking, stop speech first
+    stopSpeaking();
+
+    if (isListening) {
+      // User clicked mic to stop listening manually
+      if (recognitionRef.current) {
+        try {
+          recognitionRef.current.abort();
+        } catch (e) {}
+      }
       setIsListening(false);
+      setInterimSpeech('');
+      setMascotState('idle');
+      return;
     }
+
+    if (!isSpeechRecognitionSupported()) {
+      setError(
+        language === 'hi'
+          ? 'इस ब्राउज़र में वॉइस इनपुट समर्थित नहीं है। आप Google Chrome, Edge, या Brave में चलाएं।'
+          : "Voice input isn't supported in this browser. Please use Chrome, Edge, or Brave, or type your question instead."
+      );
+      return;
+    }
+
+    // Start real SpeechRecognition
+    recognitionRef.current = startVoiceRecognition({
+      language,
+      onStart: () => {
+        setIsListening(true);
+        setMascotState('listening');
+        setError(null);
+        setInterimSpeech('');
+      },
+      onInterimResult: (interimText) => {
+        setInterimSpeech(interimText);
+      },
+      onResult: (transcript) => {
+        setIsListening(false);
+        setInterimSpeech('');
+        if (transcript && transcript.trim()) {
+          handleSendMessage(transcript.trim());
+        } else {
+          setMascotState('idle');
+        }
+      },
+      onError: (errMsg, errType) => {
+        setIsListening(false);
+        setInterimSpeech('');
+        setMascotState('idle');
+        if (errType !== 'no-speech' && errType !== 'aborted') {
+          setError(errMsg);
+        }
+      },
+      onEnd: (hasResult) => {
+        setIsListening(false);
+        setInterimSpeech('');
+        if (!hasResult && mascotState === 'listening') {
+          setMascotState('idle');
+        }
+      },
+    });
   };
 
   return (
@@ -128,8 +227,22 @@ export const Chat = () => {
         {/* Top Notification Badge */}
         <div className="mb-6 flex flex-col sm:flex-row items-center justify-between gap-3 bg-white p-3.5 rounded-2xl border border-slate-200 shadow-xs">
           <div className="flex items-center gap-2 text-xs font-semibold text-ganga-800">
-            <span className="w-2 h-2 rounded-full bg-emerald-500 animate-ping" />
-            <span>SIH1290 Digital Avatar Live Session</span>
+            <span
+              className={`w-2 h-2 rounded-full ${
+                mascotState === 'listening'
+                  ? 'bg-rose-500 animate-ping'
+                  : mascotState === 'speaking'
+                  ? 'bg-emerald-500 animate-pulse'
+                  : 'bg-ganga-500'
+              }`}
+            />
+            <span>
+              {mascotState === 'listening'
+                ? 'Listening to your voice...'
+                : mascotState === 'speaking'
+                ? 'Chacha is speaking with voice...'
+                : 'SIH1290 Digital Avatar Live Session'}
+            </span>
           </div>
           <div className="flex items-center gap-2 text-xs text-slate-500">
             <Info className="w-3.5 h-3.5 text-ganga-600" />
@@ -144,7 +257,13 @@ export const Chat = () => {
             initial={{ opacity: 0, x: -15 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.4 }}
-            className="lg:col-span-5 flex flex-col items-center justify-center bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/80 shadow-lg text-center"
+            className={`lg:col-span-5 flex flex-col items-center justify-center bg-white rounded-3xl p-6 sm:p-8 border shadow-lg text-center transition-all duration-300 ${
+              mascotState === 'listening'
+                ? 'border-rose-300 ring-2 ring-rose-200 shadow-rose-100'
+                : mascotState === 'speaking'
+                ? 'border-emerald-300 ring-2 ring-emerald-200 shadow-emerald-100'
+                : 'border-slate-200/80'
+            }`}
           >
             <div className="mb-2">
               <span className="text-xs font-bold uppercase tracking-wider text-sacred-saffron">
@@ -159,21 +278,38 @@ export const Chat = () => {
               state={mascotState}
               size="xl"
               interactive={true}
+              speechText={
+                mascotState === 'listening'
+                  ? interimSpeech
+                    ? `"${interimSpeech}..."`
+                    : language === 'hi'
+                    ? 'मैं सुन रहा हूँ, कृपया अपना सवाल बोलें...'
+                    : "I'm listening, please ask your question..."
+                  : null
+              }
               onClick={() => {
-                setMascotState('celebrating');
-                setTimeout(() => setMascotState('idle'), 2500);
+                if (mascotState === 'idle') {
+                  setMascotState('celebrating');
+                  setTimeout(() => setMascotState('idle'), 2500);
+                }
               }}
             />
 
             <div className="mt-6 p-4 bg-slate-50 rounded-2xl border border-slate-100 w-full text-xs text-slate-600 space-y-2 text-left">
               <div className="flex items-center gap-1.5 font-bold text-slate-800">
                 <Sparkles className="w-3.5 h-3.5 text-sacred-saffron" />
-                <span>Mascot Capabilities:</span>
+                <span>Interactive Mascot Features:</span>
               </div>
               <ul className="list-disc list-inside space-y-1 text-[11px] text-slate-600">
-                <li>Understands bilingual queries (English & Hindi)</li>
-                <li>RAG-augmented with verified Namami Gange facts</li>
-                <li>Ready for hardware robot & talking avatar sync</li>
+                <li>
+                  <strong className="text-rose-700">Listening (🎤):</strong> Real-time SpeechRecognition
+                </li>
+                <li>
+                  <strong className="text-amber-700">Thinking (🤔):</strong> RAG AI brain reasoning
+                </li>
+                <li>
+                  <strong className="text-emerald-700">Speaking (🔊):</strong> Synchronized Text-to-Speech & lip-sync
+                </li>
               </ul>
             </div>
           </motion.div>
@@ -192,6 +328,7 @@ export const Chat = () => {
               onResetChat={handleResetChat}
               onMicToggle={handleMicToggle}
               isListening={isListening}
+              interimText={interimSpeech}
               error={error}
             />
           </motion.div>

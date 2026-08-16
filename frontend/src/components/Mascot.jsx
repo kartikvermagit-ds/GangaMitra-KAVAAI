@@ -1,14 +1,16 @@
 import React from 'react';
 import { motion } from 'framer-motion';
-import { Sparkles, Brain, Volume2, Award, HeartHandshake } from 'lucide-react';
+import { Sparkles, Brain, Volume2, Award, HeartHandshake, Mic, Radio } from 'lucide-react';
 
 /**
  * Reusable Mascot Component for Chacha Chaudhary (GangaMitra)
- * Props:
- * - state: 'idle' | 'thinking' | 'speaking' | 'happy' | 'celebrating'
- * - size: 'sm' | 'md' | 'lg' | 'xl'
- * - interactive: boolean
- * - speechText: optional string to show in animated bubble
+ * States:
+ * - 'idle'
+ * - 'listening' (Attentive, audio wave pulses, listening badge)
+ * - 'thinking' (Brain working faster than computer)
+ * - 'speaking' (Active lip-sync mouth movement & speech aura)
+ * - 'happy'
+ * - 'celebrating'
  */
 export const Mascot = ({
   state = 'idle',
@@ -31,14 +33,19 @@ export const Mascot = ({
       color: 'bg-ganga-100 text-ganga-800 border-ganga-200',
       icon: Sparkles,
     },
+    listening: {
+      text: 'Chacha is listening to you...',
+      color: 'bg-rose-100 text-rose-900 border-rose-300 ring-2 ring-rose-400/40 animate-pulse',
+      icon: Mic,
+    },
     thinking: {
       text: 'Thinking faster than a computer...',
-      color: 'bg-amber-100 text-amber-800 border-amber-200 animate-pulse',
+      color: 'bg-amber-100 text-amber-900 border-amber-300 animate-pulse',
       icon: Brain,
     },
     speaking: {
       text: 'Chacha is speaking...',
-      color: 'bg-emerald-100 text-emerald-800 border-emerald-200',
+      color: 'bg-emerald-100 text-emerald-900 border-emerald-300 shadow-sm',
       icon: Volume2,
     },
     happy: {
@@ -63,7 +70,7 @@ export const Mascot = ({
         <motion.div
           initial={{ opacity: 0, y: 10, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          className="mb-3 max-w-xs bg-white text-slate-800 text-xs sm:text-sm font-medium px-4 py-2.5 rounded-2xl rounded-bl-none shadow-md border border-slate-100 relative"
+          className="mb-3 max-w-xs bg-white text-slate-800 text-xs sm:text-sm font-medium px-4 py-2.5 rounded-2xl rounded-bl-none shadow-md border border-slate-100 relative z-20"
         >
           <p className="leading-relaxed">{speechText}</p>
           <div className="absolute -bottom-2 left-6 w-3 h-3 bg-white border-b border-r border-slate-100 transform rotate-45" />
@@ -73,17 +80,26 @@ export const Mascot = ({
       {/* Mascot Avatar Graphic Container */}
       <motion.div
         animate={
-          state === 'thinking'
+          state === 'listening'
+            ? { scale: [1, 1.03, 1], y: [0, -3, 0] }
+            : state === 'thinking'
             ? { y: [0, -6, 0], rotate: [-1, 1, -1] }
             : state === 'speaking'
-            ? { scale: [1, 1.03, 1] }
+            ? { scale: [1, 1.025, 1], y: [0, -2, 0] }
             : state === 'celebrating'
             ? { y: [0, -12, 0], scale: [1, 1.05, 1] }
             : { y: [0, -5, 0] }
         }
         transition={{
           repeat: Infinity,
-          duration: state === 'thinking' ? 1.8 : state === 'speaking' ? 1.2 : 3.5,
+          duration:
+            state === 'listening'
+              ? 1.5
+              : state === 'thinking'
+              ? 1.8
+              : state === 'speaking'
+              ? 0.8
+              : 3.5,
           ease: 'easeInOut',
         }}
         onClick={onClick}
@@ -91,16 +107,34 @@ export const Mascot = ({
       >
         {/* Glow halo behind mascot */}
         <div
-          className={`absolute inset-0 rounded-full blur-2xl opacity-40 transition-colors duration-500 ${
-            state === 'thinking'
+          className={`absolute inset-0 rounded-full blur-2xl opacity-50 transition-all duration-500 ${
+            state === 'listening'
+              ? 'bg-rose-400 scale-110'
+              : state === 'thinking'
               ? 'bg-amber-300'
               : state === 'speaking'
-              ? 'bg-emerald-300'
+              ? 'bg-emerald-300 scale-105'
               : state === 'celebrating'
               ? 'bg-sacred-saffron'
               : 'bg-ganga-300'
           }`}
         />
+
+        {/* Listening Concentric Waves Ring */}
+        {state === 'listening' && (
+          <>
+            <motion.div
+              animate={{ scale: [1, 1.25, 1], opacity: [0.6, 0, 0.6] }}
+              transition={{ repeat: Infinity, duration: 1.6, ease: 'easeOut' }}
+              className="absolute inset-0 rounded-full border-2 border-rose-400 pointer-events-none"
+            />
+            <motion.div
+              animate={{ scale: [1, 1.45, 1], opacity: [0.4, 0, 0.4] }}
+              transition={{ repeat: Infinity, duration: 1.6, delay: 0.3, ease: 'easeOut' }}
+              className="absolute inset-0 rounded-full border border-rose-300 pointer-events-none"
+            />
+          </>
+        )}
 
         {/* Chacha Chaudhary Mascot SVG Character Illustration */}
         <svg
@@ -110,7 +144,15 @@ export const Mascot = ({
           xmlns="http://www.w3.org/2000/svg"
         >
           {/* Circular Badge Background */}
-          <circle cx="100" cy="100" r="92" fill="#F0F7FF" stroke="#0284C7" strokeWidth="4" />
+          <circle
+            cx="100"
+            cy="100"
+            r="92"
+            fill="#F0F7FF"
+            stroke={state === 'listening' ? '#F43F5E' : state === 'speaking' ? '#10B981' : '#0284C7'}
+            strokeWidth="4"
+            className="transition-colors duration-300"
+          />
           <circle cx="100" cy="100" r="86" fill="#FFFFFF" />
 
           {/* Water wave decoration inside badge */}
@@ -151,14 +193,42 @@ export const Mascot = ({
           <circle cx="100" cy="48" r="2.5" fill="#0284C7" />
 
           {/* Eyebrows */}
-          <path d="M78 88 Q 86 83 94 88" stroke="#4B5563" strokeWidth="3.5" strokeLinecap="round" />
-          <path d="M106 88 Q 114 83 122 88" stroke="#4B5563" strokeWidth="3.5" strokeLinecap="round" />
+          <path
+            d={
+              state === 'listening'
+                ? 'M76 86 Q 86 80 94 86'
+                : 'M78 88 Q 86 83 94 88'
+            }
+            stroke="#4B5563"
+            strokeWidth="3.5"
+            strokeLinecap="round"
+          />
+          <path
+            d={
+              state === 'listening'
+                ? 'M106 86 Q 114 80 124 86'
+                : 'M106 88 Q 114 83 122 88'
+            }
+            stroke="#4B5563"
+            strokeWidth="3.5"
+            strokeLinecap="round"
+          />
 
           {/* Eyes with wise twinkling catchlights */}
-          <circle cx="86" cy="98" r="5" fill="#1F2937" />
-          <circle cx="88" cy="96" r="1.8" fill="#FFFFFF" />
-          <circle cx="114" cy="98" r="5" fill="#1F2937" />
-          <circle cx="116" cy="96" r="1.8" fill="#FFFFFF" />
+          <circle
+            cx="86"
+            cy={state === 'listening' ? '97' : '98'}
+            r={state === 'listening' ? '5.5' : '5'}
+            fill="#1F2937"
+          />
+          <circle cx="88" cy={state === 'listening' ? '95' : '96'} r="1.8" fill="#FFFFFF" />
+          <circle
+            cx="114"
+            cy={state === 'listening' ? '97' : '98'}
+            r={state === 'listening' ? '5.5' : '5'}
+            fill="#1F2937"
+          />
+          <circle cx="116" cy={state === 'listening' ? '95' : '96'} r="1.8" fill="#FFFFFF" />
 
           {/* Nose */}
           <ellipse cx="100" cy="108" rx="4.5" ry="6" fill="#F6AD55" />
@@ -171,22 +241,43 @@ export const Mascot = ({
             strokeWidth="1.5"
           />
 
-          {/* Cheerful Smile Mouth */}
-          <path
-            d={
-              state === 'speaking'
-                ? 'M92 126 Q 100 136 108 126 Z'
-                : state === 'celebrating' || state === 'happy'
-                ? 'M90 125 Q 100 138 110 125'
-                : 'M93 125 Q 100 132 107 125'
-            }
-            stroke="#991B1B"
-            strokeWidth="2.5"
-            fill={state === 'speaking' ? '#991B1B' : 'none'}
-            strokeLinecap="round"
-          />
+          {/* Animated Mouth (Speaking Lip-Sync / Smiling / Attentive) */}
+          {state === 'speaking' ? (
+            <motion.ellipse
+              cx="100"
+              cy="128"
+              rx="6"
+              animate={{ ry: [2, 7, 3, 8, 2] }}
+              transition={{ repeat: Infinity, duration: 0.35, ease: 'easeInOut' }}
+              fill="#991B1B"
+            />
+          ) : state === 'listening' ? (
+            <ellipse cx="100" cy="126" rx="4" ry="2.5" fill="#991B1B" />
+          ) : (
+            <path
+              d={
+                state === 'celebrating' || state === 'happy'
+                  ? 'M90 125 Q 100 138 110 125'
+                  : 'M93 125 Q 100 132 107 125'
+              }
+              stroke="#991B1B"
+              strokeWidth="2.5"
+              fill="none"
+              strokeLinecap="round"
+            />
+          )}
 
-          {/* Thinking Brain Indicator Overlay */}
+          {/* LISTENING INDICATOR OVERLAY (Microphone & sound radar on ear) */}
+          {state === 'listening' && (
+            <g transform="translate(140, 70)">
+              <circle cx="12" cy="12" r="14" fill="#FFE4E6" stroke="#F43F5E" strokeWidth="2" />
+              <rect x="9.5" y="6" width="5" height="8" rx="2.5" fill="#E11D48" />
+              <path d="M7 10 C 7 14, 17 14, 17 10" stroke="#E11D48" strokeWidth="1.5" fill="none" />
+              <line x1="12" y1="14" x2="12" y2="17" stroke="#E11D48" strokeWidth="1.5" />
+            </g>
+          )}
+
+          {/* THINKING BRAIN INDICATOR OVERLAY */}
           {state === 'thinking' && (
             <g transform="translate(140, 30)">
               <circle cx="12" cy="12" r="14" fill="#FEF08A" stroke="#CA8A04" strokeWidth="2" />
@@ -199,9 +290,9 @@ export const Mascot = ({
             </g>
           )}
 
-          {/* Speaking Audio Waves Overlay */}
+          {/* SPEAKING AUDIO WAVES OVERLAY */}
           {state === 'speaking' && (
-            <g transform="translate(145, 100)">
+            <g transform="translate(145, 95)">
               <circle cx="10" cy="10" r="12" fill="#D1FAE5" stroke="#059669" strokeWidth="1.5" />
               <path d="M7 6 Q 11 10 7 14" stroke="#047857" strokeWidth="2" fill="none" />
               <path d="M11 4 Q 16 10 11 16" stroke="#047857" strokeWidth="2" fill="none" />
@@ -209,16 +300,24 @@ export const Mascot = ({
           )}
         </svg>
 
-        {/* Future Robot Hardware / 3D Avatar Connection Slot Indicator (Subtle badge) */}
+        {/* Mascot Mode Badge */}
         <div className="absolute -bottom-1 -right-1 bg-white/95 border border-slate-200 text-[10px] font-semibold text-slate-600 px-2 py-0.5 rounded-full shadow-sm flex items-center gap-1 z-20">
-          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-ping"></span>
-          <span>AI Mascot</span>
+          <span
+            className={`w-1.5 h-1.5 rounded-full ${
+              state === 'listening'
+                ? 'bg-rose-500 animate-ping'
+                : state === 'speaking'
+                ? 'bg-emerald-500 animate-pulse'
+                : 'bg-ganga-500'
+            }`}
+          />
+          <span>{state === 'listening' ? 'Listening' : state === 'speaking' ? 'Speaking' : 'AI Mascot'}</span>
         </div>
       </motion.div>
 
       {/* State Status Tag */}
       <div
-        className={`mt-3 inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold border ${currentBadge.color} transition-all duration-300`}
+        className={`mt-3 inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-semibold border ${currentBadge.color} transition-all duration-300`}
       >
         <BadgeIcon className="w-3.5 h-3.5" />
         <span>{currentBadge.text}</span>

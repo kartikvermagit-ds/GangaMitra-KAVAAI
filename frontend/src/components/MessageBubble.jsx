@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { motion } from 'framer-motion';
-import { Bot, User, BookOpen, Copy, Check, Volume2, Sparkles } from 'lucide-react';
+import { Bot, User, BookOpen, Copy, Check, Volume2, Sparkles, VolumeX } from 'lucide-react';
+import { speakText, stopSpeaking } from '../services/speech';
 
 export const MessageBubble = ({ message, isLast = false }) => {
   const isUser = message.role === 'user';
@@ -14,17 +15,16 @@ export const MessageBubble = ({ message, isLast = false }) => {
   };
 
   const handleSpeak = () => {
-    if ('speechSynthesis' in window) {
-      if (isPlaying) {
-        window.speechSynthesis.cancel();
-        setIsPlaying(false);
-      } else {
-        const utterance = new SpeechSynthesisUtterance(message.content);
-        utterance.onend = () => setIsPlaying(false);
-        utterance.onerror = () => setIsPlaying(false);
-        setIsPlaying(true);
-        window.speechSynthesis.speak(utterance);
-      }
+    if (isPlaying) {
+      stopSpeaking();
+      setIsPlaying(false);
+    } else {
+      speakText({
+        text: message.content,
+        onStart: () => setIsPlaying(true),
+        onEnd: () => setIsPlaying(false),
+        onError: () => setIsPlaying(false),
+      });
     }
   };
 
@@ -104,12 +104,12 @@ export const MessageBubble = ({ message, isLast = false }) => {
               </button>
               <button
                 onClick={handleSpeak}
-                title="Read aloud"
+                title={isPlaying ? 'Stop listening' : 'Read aloud'}
                 className={`p-1 hover:text-slate-700 hover:bg-slate-50 rounded transition-colors text-xs flex items-center gap-1 ${
                   isPlaying ? 'text-ganga-600 font-semibold' : ''
                 }`}
               >
-                <Volume2 className="w-3.5 h-3.5" />
+                {isPlaying ? <VolumeX className="w-3.5 h-3.5 text-rose-600" /> : <Volume2 className="w-3.5 h-3.5" />}
                 <span className="text-[10px]">{isPlaying ? 'Stop' : 'Listen'}</span>
               </button>
             </div>
