@@ -95,7 +95,7 @@ export const ChachaAvatar = ({
               : state === 'thinking'
               ? 1.8
               : state === 'speaking'
-              ? 0.8
+              ? 1.4
               : 3.5,
           ease: 'easeInOut',
         }}
@@ -235,17 +235,17 @@ export const ChachaAvatar = ({
           {/* ============================================================== */}
           {state === 'speaking' ? (
             <g>
-              {/* Dynamic open/close mouth cavity */}
+              {/* Dynamic open/close mouth cavity with natural, slower speech cadence */}
               <motion.ellipse
                 cx="100"
                 cy="128"
                 animate={{
-                  rx: [4, 7.5, 5, 8.5, 4],
-                  ry: [2, 8, 3, 9.5, 2],
+                  rx: [4, 6.5, 4.5, 7.5, 4.5, 6, 4],
+                  ry: [2, 6.5, 2.8, 7.8, 2.5, 5.5, 2],
                 }}
                 transition={{
                   repeat: Infinity,
-                  duration: 0.28,
+                  duration: 0.55,
                   ease: 'easeInOut',
                 }}
                 fill="#7F1D1D"
@@ -260,20 +260,20 @@ export const ChachaAvatar = ({
                 height="2.5"
                 rx="1"
                 fill="#FFFFFF"
-                animate={{ opacity: [0.8, 1, 0.8] }}
-                transition={{ repeat: Infinity, duration: 0.28 }}
+                animate={{ opacity: [0.85, 1, 0.85] }}
+                transition={{ repeat: Infinity, duration: 0.55 }}
               />
               {/* Animated pink tongue */}
               <motion.ellipse
                 cx="100"
-                cy="132"
+                cy="131"
                 animate={{
-                  rx: [2.5, 4.5, 3, 5.5, 2.5],
-                  ry: [1, 3.5, 1.8, 4.5, 1],
+                  rx: [2.5, 4.2, 3, 5, 2.8, 4, 2.5],
+                  ry: [1, 2.8, 1.5, 3.5, 1.4, 2.5, 1],
                 }}
                 transition={{
                   repeat: Infinity,
-                  duration: 0.28,
+                  duration: 0.55,
                   ease: 'easeInOut',
                 }}
                 fill="#FB7185"
@@ -305,10 +305,10 @@ export const ChachaAvatar = ({
             strokeWidth="1.5"
             animate={
               state === 'speaking'
-                ? { y: [0, -1.5, 0, -2, 0] }
+                ? { y: [0, -1, 0, -1.2, 0] }
                 : { y: 0 }
             }
-            transition={{ repeat: Infinity, duration: 0.28, ease: 'easeInOut' }}
+            transition={{ repeat: Infinity, duration: 0.55, ease: 'easeInOut' }}
           />
 
           {/* LISTENING INDICATOR OVERLAY (Microphone on ear) */}
