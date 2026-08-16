@@ -233,24 +233,56 @@ export const Mascot = ({
           {/* Nose */}
           <ellipse cx="100" cy="108" rx="4.5" ry="6" fill="#F6AD55" />
 
-          {/* Iconic White Mustache */}
-          <path
+          {/* Iconic White Mustache with subtle flutter when speaking */}
+          <motion.path
             d="M100 114 C 92 110, 72 112, 68 126 C 78 126, 92 122, 100 117 C 108 122, 122 126, 132 126 C 128 112, 108 110, 100 114 Z"
             fill="#FFFFFF"
             stroke="#E5E7EB"
             strokeWidth="1.5"
+            animate={
+              state === 'speaking'
+                ? { y: [0, -1.5, 0, -1, 0] }
+                : { y: 0 }
+            }
+            transition={{ repeat: Infinity, duration: 0.28, ease: 'easeInOut' }}
           />
 
           {/* Animated Mouth (Speaking Lip-Sync / Smiling / Attentive) */}
           {state === 'speaking' ? (
-            <motion.ellipse
-              cx="100"
-              cy="128"
-              rx="6"
-              animate={{ ry: [2, 7, 3, 8, 2] }}
-              transition={{ repeat: Infinity, duration: 0.35, ease: 'easeInOut' }}
-              fill="#991B1B"
-            />
+            <g>
+              {/* Mouth Cavity with dynamic lip-sync shape */}
+              <motion.ellipse
+                cx="100"
+                cy="128"
+                animate={{
+                  rx: [4, 7, 5, 8, 4],
+                  ry: [2, 7.5, 3, 9, 2],
+                }}
+                transition={{
+                  repeat: Infinity,
+                  duration: 0.3,
+                  ease: 'easeInOut',
+                }}
+                fill="#881337"
+                stroke="#9F1239"
+                strokeWidth="1"
+              />
+              {/* Tongue accent */}
+              <motion.ellipse
+                cx="100"
+                cy="131"
+                animate={{
+                  rx: [2.5, 4, 3, 4.5, 2.5],
+                  ry: [1, 2.5, 1.5, 3, 1],
+                }}
+                transition={{
+                  repeat: Infinity,
+                  duration: 0.3,
+                  ease: 'easeInOut',
+                }}
+                fill="#FB7185"
+              />
+            </g>
           ) : state === 'listening' ? (
             <ellipse cx="100" cy="126" rx="4" ry="2.5" fill="#991B1B" />
           ) : (
