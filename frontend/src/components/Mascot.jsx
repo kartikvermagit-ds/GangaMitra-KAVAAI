@@ -3,12 +3,14 @@ import { motion } from 'framer-motion';
 import { Sparkles, Brain, Volume2, Award, HeartHandshake, Mic } from 'lucide-react';
 
 /**
- * Authentic Chacha Chaudhary Mascot Component for GangaMitra-KAVAAI (SIH1290)
- * Visuals:
- * - Iconic large traditional red/crimson turban with layered fabric wraps
- * - Trademark thick, sweeping long white curved moustache
- * - Yellow traditional kurta with black/dark waistcoat & red scarf accents
- * - Fully animated states: idle, listening, thinking, speaking, happy, celebrating
+ * Official Chacha Chaudhary Avatar for GangaMitra-KAVAAI (SIH1290)
+ * Exact visual recreation matching the official reference image:
+ * - Iconic red turban with fan-crest (turra) & trailing scarf
+ * - White hair tuft, big cartoon eyes, round button nose
+ * - Thick sweeping upward-curved white moustache
+ * - Yellow shirt, black vest, red necktie, thumbs-up & walking cane
+ * - Scenic Ganga river & temple ghats backdrop
+ * - Animated states: idle, listening, thinking, speaking, happy, celebrating
  */
 export const Mascot = ({
   state = 'idle',
@@ -19,41 +21,41 @@ export const Mascot = ({
   onClick,
 }) => {
   const sizeMap = {
-    sm: 'w-24 h-24',
-    md: 'w-44 h-44',
-    lg: 'w-64 h-64',
-    xl: 'w-80 h-80',
+    sm: 'w-28 h-28',
+    md: 'w-48 h-48',
+    lg: 'w-72 h-72',
+    xl: 'w-88 h-88',
   };
 
   const stateBadges = {
     idle: {
       text: 'Chacha Chaudhary (Ganga Mitra)',
-      color: 'bg-ganga-100 text-ganga-800 border-ganga-200',
+      color: 'bg-ganga-100 text-ganga-900 border-ganga-300',
       icon: Sparkles,
     },
     listening: {
       text: 'Chacha is listening to you...',
-      color: 'bg-rose-100 text-rose-900 border-rose-300 ring-2 ring-rose-400/40 animate-pulse',
+      color: 'bg-rose-100 text-rose-950 border-rose-300 ring-2 ring-rose-400/40 animate-pulse',
       icon: Mic,
     },
     thinking: {
       text: 'Thinking faster than a computer...',
-      color: 'bg-amber-100 text-amber-900 border-amber-300 animate-pulse',
+      color: 'bg-amber-100 text-amber-950 border-amber-300 animate-pulse',
       icon: Brain,
     },
     speaking: {
       text: 'Chacha is speaking...',
-      color: 'bg-emerald-100 text-emerald-900 border-emerald-300 shadow-sm',
+      color: 'bg-emerald-100 text-emerald-950 border-emerald-300 shadow-sm',
       icon: Volume2,
     },
     happy: {
       text: 'Namami Gange!',
-      color: 'bg-blue-100 text-blue-800 border-blue-200',
+      color: 'bg-blue-100 text-blue-900 border-blue-200',
       icon: HeartHandshake,
     },
     celebrating: {
       text: 'Shabash! Great job!',
-      color: 'bg-sacred-saffron/20 text-amber-900 border-sacred-saffron/40',
+      color: 'bg-sacred-saffron/20 text-amber-950 border-sacred-saffron/40',
       icon: Award,
     },
   };
@@ -63,15 +65,19 @@ export const Mascot = ({
 
   return (
     <div className={`flex flex-col items-center justify-center relative select-none ${className}`}>
-      {/* Dynamic Speech Bubble if text provided */}
+      {/* Dynamic Speech Bubble if text provided or default Namaste greeting */}
       {speechText && (
         <motion.div
           initial={{ opacity: 0, y: 10, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          className="mb-3 max-w-xs bg-white text-slate-800 text-xs sm:text-sm font-medium px-4 py-2.5 rounded-2xl rounded-bl-none shadow-md border border-slate-100 relative z-20"
+          className="mb-3 max-w-xs bg-white text-slate-800 text-xs sm:text-sm font-semibold px-4 py-2.5 rounded-3xl rounded-bl-none shadow-lg border-2 border-ganga-100 relative z-20"
         >
-          <p className="leading-relaxed">{speechText}</p>
-          <div className="absolute -bottom-2 left-6 w-3 h-3 bg-white border-b border-r border-slate-100 transform rotate-45" />
+          <div className="flex items-center gap-1.5 text-ganga-700 font-extrabold text-sm mb-0.5">
+            <span>नमस्ते!</span>
+            <span className="text-sacred-saffron">✨</span>
+          </div>
+          <p className="leading-snug text-slate-700">{speechText}</p>
+          <div className="absolute -bottom-2 left-6 w-3.5 h-3.5 bg-white border-b-2 border-r-2 border-ganga-100 transform rotate-45" />
         </motion.div>
       )}
 
@@ -86,7 +92,7 @@ export const Mascot = ({
             ? { scale: [1, 1.025, 1], y: [0, -2, 0] }
             : state === 'celebrating'
             ? { y: [0, -12, 0], scale: [1, 1.05, 1] }
-            : { y: [0, -5, 0] }
+            : { y: [0, -4, 0] }
         }
         transition={{
           repeat: Infinity,
@@ -105,7 +111,7 @@ export const Mascot = ({
       >
         {/* Glow halo behind mascot */}
         <div
-          className={`absolute inset-0 rounded-full blur-2xl opacity-50 transition-all duration-500 ${
+          className={`absolute inset-0 rounded-full blur-2xl opacity-60 transition-all duration-500 ${
             state === 'listening'
               ? 'bg-rose-400 scale-110'
               : state === 'thinking'
@@ -114,7 +120,7 @@ export const Mascot = ({
               ? 'bg-emerald-300 scale-105'
               : state === 'celebrating'
               ? 'bg-sacred-saffron'
-              : 'bg-ganga-300'
+              : 'bg-ganga-400'
           }`}
         />
 
@@ -124,197 +130,311 @@ export const Mascot = ({
             <motion.div
               animate={{ scale: [1, 1.25, 1], opacity: [0.6, 0, 0.6] }}
               transition={{ repeat: Infinity, duration: 1.6, ease: 'easeOut' }}
-              className="absolute inset-0 rounded-full border-2 border-rose-400 pointer-events-none"
+              className="absolute inset-0 rounded-full border-3 border-rose-400 pointer-events-none"
             />
             <motion.div
               animate={{ scale: [1, 1.45, 1], opacity: [0.4, 0, 0.4] }}
               transition={{ repeat: Infinity, duration: 1.6, delay: 0.3, ease: 'easeOut' }}
-              className="absolute inset-0 rounded-full border border-rose-300 pointer-events-none"
+              className="absolute inset-0 rounded-full border-2 border-rose-300 pointer-events-none"
             />
           </>
         )}
 
-        {/* Authentic Chacha Chaudhary Character SVG */}
+        {/* ============================================================== */}
+        {/* EXACT REFERENCE ILLUSTRATION: CHACHA CHAUDHARY & GANGA SCENE */}
+        {/* ============================================================== */}
         <svg
-          viewBox="0 0 220 220"
-          className="w-full h-full drop-shadow-xl z-10"
+          viewBox="0 0 280 280"
+          className="w-full h-full drop-shadow-2xl z-10"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
         >
-          {/* Circular Badge Background with River Wave motif */}
+          <defs>
+            {/* Clip path for circular scenic background */}
+            <clipPath id="circleClip">
+              <circle cx="140" cy="140" r="120" />
+            </clipPath>
+
+            {/* Gradients */}
+            <linearGradient id="skyGrad" x1="140" y1="20" x2="140" y2="180" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stopColor="#38BDF8" />
+              <stop offset="60%" stopColor="#BAE6FD" />
+              <stop offset="100%" stopColor="#E0F2FE" />
+            </linearGradient>
+
+            <linearGradient id="riverGrad" x1="140" y1="150" x2="140" y2="260" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stopColor="#38BDF8" />
+              <stop offset="50%" stopColor="#0284C7" />
+              <stop offset="100%" stopColor="#0369A1" />
+            </linearGradient>
+
+            <linearGradient id="turbanGrad" x1="100" y1="40" x2="180" y2="150" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stopColor="#EF4444" />
+              <stop offset="50%" stopColor="#DC2626" />
+              <stop offset="100%" stopColor="#991B1B" />
+            </linearGradient>
+
+            <linearGradient id="turraGrad" x1="90" y1="30" x2="130" y2="90" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stopColor="#F87171" />
+              <stop offset="40%" stopColor="#DC2626" />
+              <stop offset="100%" stopColor="#991B1B" />
+            </linearGradient>
+
+            <linearGradient id="skinGrad" x1="140" y1="100" x2="140" y2="180" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stopColor="#FED7AA" />
+              <stop offset="100%" stopColor="#FDBA74" />
+            </linearGradient>
+          </defs>
+
+          {/* Outer Glowing Border Ring */}
           <circle
-            cx="110"
-            cy="110"
-            r="102"
-            fill="#F8FAFC"
-            stroke={state === 'listening' ? '#F43F5E' : state === 'speaking' ? '#10B981' : '#0284C7'}
-            strokeWidth="4"
+            cx="140"
+            cy="140"
+            r="128"
+            fill="none"
+            stroke={state === 'listening' ? '#F43F5E' : state === 'speaking' ? '#10B981' : '#38BDF8'}
+            strokeWidth="8"
             className="transition-colors duration-300"
           />
-          <circle cx="110" cy="110" r="96" fill="#FFFFFF" />
+          <circle cx="140" cy="140" r="122" fill="#FFFFFF" />
 
-          {/* Gentle background river water accent */}
-          <path
-            d="M20 165 C 60 150, 100 175, 140 160 C 170 150, 195 165, 210 160 L 210 210 L 10 210 Z"
-            fill="#E0F2FE"
-            opacity="0.7"
-          />
-          <path
-            d="M10 180 C 55 170, 95 190, 145 178 C 175 170, 195 182, 210 180 L 210 210 L 10 210 Z"
-            fill="#0284C7"
-            opacity="0.85"
-          />
+          {/* Circular Scenic Portal Background */}
+          <g clipPath="url(#circleClip)">
+            {/* Sky Background */}
+            <rect x="0" y="0" width="280" height="280" fill="url(#skyGrad)" />
+
+            {/* Clouds */}
+            <circle cx="60" cy="70" r="22" fill="#FFFFFF" opacity="0.6" />
+            <circle cx="80" cy="65" r="26" fill="#FFFFFF" opacity="0.6" />
+            <circle cx="100" cy="72" r="20" fill="#FFFFFF" opacity="0.6" />
+            <circle cx="210" cy="80" r="24" fill="#FFFFFF" opacity="0.5" />
+            <circle cx="235" cy="75" r="28" fill="#FFFFFF" opacity="0.5" />
+
+            {/* Distant Birds */}
+            <path d="M70 100 Q 75 96 80 100 Q 85 96 90 100" stroke="#0369A1" strokeWidth="1.5" fill="none" />
+            <path d="M190 90 Q 194 87 198 90 Q 202 87 206 90" stroke="#0369A1" strokeWidth="1.5" fill="none" />
+            <path d="M180 105 Q 183 102 186 105 Q 189 102 192 105" stroke="#0369A1" strokeWidth="1.2" fill="none" />
+
+            {/* River Ganga Bridge (in background) */}
+            <rect x="40" y="140" width="120" height="8" fill="#E2E8F0" />
+            <path d="M45 148 Q 57 140 70 148 Q 82 140 95 148 Q 107 140 120 148 Q 132 140 145 148" stroke="#94A3B8" strokeWidth="3" fill="#BAE6FD" />
+
+            {/* Ancient Varanasi Temple Ghats & Spires (right background) */}
+            <path d="M205 150 L205 110 L212 90 L219 110 L219 150 Z" fill="#FDE68A" stroke="#D97706" strokeWidth="1" />
+            <path d="M188 150 L188 120 L195 105 L202 120 L202 150 Z" fill="#FDE047" stroke="#D97706" strokeWidth="1" />
+            <path d="M222 150 L222 125 L228 112 L234 125 L234 150 Z" fill="#FEF08A" stroke="#D97706" strokeWidth="1" />
+            {/* Temple domes & pillars */}
+            <circle cx="212" cy="88" r="3" fill="#D97706" />
+            <circle cx="195" cy="103" r="2.5" fill="#D97706" />
+            <rect x="180" y="145" width="60" height="15" fill="#FCD34D" stroke="#D97706" strokeWidth="1" />
+            {/* Ghat steps */}
+            <line x1="175" y1="154" x2="245" y2="154" stroke="#B45309" strokeWidth="1.5" />
+            <line x1="175" y1="158" x2="245" y2="158" stroke="#B45309" strokeWidth="1.5" />
+
+            {/* River Ganga Water with ripples */}
+            <path d="M0 152 C 80 145, 180 160, 280 150 L 280 280 L 0 280 Z" fill="url(#riverGrad)" />
+            <path d="M20 170 C 90 165, 170 175, 260 168" stroke="#E0F2FE" strokeWidth="2" strokeLinecap="round" opacity="0.6" />
+            <path d="M40 190 C 110 185, 190 195, 270 188" stroke="#E0F2FE" strokeWidth="2.5" strokeLinecap="round" opacity="0.5" />
+          </g>
 
           {/* ============================================================== */}
-          {/* 1. BODY & CLOTHING (Iconic Yellow Kurta + Dark Vest + Red Scarf) */}
+          {/* 1. CLOTHING (Yellow Kurta + Black Vest + Red Tie + Cane & Thumb) */}
           {/* ============================================================== */}
-          
-          {/* Yellow Kurta / Shirt Body */}
+
+          {/* Yellow Kurta / Shirt */}
           <path
-            d="M50 175 C 50 160, 80 155, 110 155 C 140 155, 170 160, 170 175 L 178 220 L 42 220 Z"
+            d="M75 220 C 75 190, 105 185, 140 185 C 175 185, 205 190, 205 220 L 215 280 L 65 280 Z"
             fill="#FACC15"
           />
-          {/* Kurta Collar detail */}
-          <path d="M96 155 L110 172 L124 155 Z" fill="#EAB308" />
 
-          {/* Dark Traditional Waistcoat / Vest */}
+          {/* Black Waistcoat / Vest */}
           <path
-            d="M50 175 L82 175 L88 220 L42 220 Z"
+            d="M92 188 L122 188 L126 280 L72 280 Z"
             fill="#1E293B"
           />
           <path
-            d="M170 175 L138 175 L132 220 L178 220 Z"
+            d="M188 188 L158 188 L154 280 L208 280 Z"
             fill="#1E293B"
           />
+          {/* Vest center buttons */}
+          <circle cx="140" cy="225" r="3" fill="#64748B" />
+          <circle cx="140" cy="245" r="3" fill="#64748B" />
+          <circle cx="140" cy="265" r="3" fill="#64748B" />
 
-          {/* Red Scarf / Angavastram Accent */}
-          <path
-            d="M74 165 C 78 180, 84 205, 86 220 L 76 220 C 72 205, 68 180, 66 165 Z"
-            fill="#DC2626"
-          />
+          {/* Red Tie / Cravat */}
+          <path d="M132 185 L148 185 L145 235 L140 242 L135 235 Z" fill="#DC2626" />
+          <path d="M130 185 L140 196 L150 185 Z" fill="#B91C1C" />
+
+          {/* Left Hand holding Wooden Walking Cane */}
+          <g>
+            {/* Wooden Cane shaft & curved handle */}
+            <path
+              d="M78 200 C 78 188, 88 185, 96 185 C 98 185, 100 187, 100 190 C 100 193, 98 195, 96 195 C 90 195, 86 197, 86 204 L 86 280 L 78 280 Z"
+              fill="#78350F"
+            />
+            {/* Hand gripping cane */}
+            <circle cx="94" cy="204" r="10" fill="#FED7AA" stroke="#D97706" strokeWidth="1" />
+            <path d="M88 200 C 94 198, 98 198, 102 203" stroke="#D97706" strokeWidth="1.5" fill="none" />
+          </g>
+
+          {/* Right Hand giving Thumbs Up (Signature Chacha Chaudhary pose!) */}
+          <g>
+            {/* Yellow Sleeve */}
+            <path d="M192 195 C 205 198, 220 208, 218 226 L 196 238 Z" fill="#FACC15" />
+            {/* Hand Fist */}
+            <circle cx="218" cy="214" r="11" fill="#FED7AA" stroke="#D97706" strokeWidth="1.5" />
+            {/* Thumb Up */}
+            <path
+              d="M214 212 C 214 200, 217 182, 223 182 C 228 182, 230 192, 228 206 C 228 214, 222 216, 214 212 Z"
+              fill="#FED7AA"
+              stroke="#D97706"
+              strokeWidth="1.5"
+            />
+            <path d="M218 206 C 222 206, 225 208, 226 214" stroke="#D97706" strokeWidth="1.2" fill="none" />
+          </g>
+
+          {/* ============================================================== */}
+          {/* 2. NECK, EARS & ROUND CARTOON FACE */}
+          {/* ============================================================== */}
           
-          {/* Buttons on Kurta */}
-          <circle cx="110" cy="184" r="2.5" fill="#78350F" />
-          <circle cx="110" cy="198" r="2.5" fill="#78350F" />
-          <circle cx="110" cy="212" r="2.5" fill="#78350F" />
-
           {/* Neck */}
-          <rect x="96" y="132" width="28" height="28" rx="6" fill="#FCD34D" />
+          <rect x="122" y="152" width="36" height="34" rx="8" fill="url(#skinGrad)" />
 
-          {/* ============================================================== */}
-          {/* 2. HEAD, EARS & FACE STRUCTURE */}
-          {/* ============================================================== */}
-          
           {/* Large Friendly Ears */}
-          <circle cx="68" cy="118" r="13" fill="#FCD34D" stroke="#D97706" strokeWidth="1" />
-          <path d="M68 112 C 64 116, 64 122, 68 124" stroke="#D97706" strokeWidth="1.5" fill="none" />
+          <circle cx="90" cy="138" r="14" fill="#FED7AA" stroke="#D97706" strokeWidth="1.5" />
+          <path d="M90 131 C 86 135, 86 142, 90 145" stroke="#D97706" strokeWidth="2" fill="none" />
 
-          <circle cx="152" cy="118" r="13" fill="#FCD34D" stroke="#D97706" strokeWidth="1" />
-          <path d="M152 112 C 156 116, 156 122, 152 124" stroke="#D97706" strokeWidth="1.5" fill="none" />
+          <circle cx="190" cy="138" r="14" fill="#FED7AA" stroke="#D97706" strokeWidth="1.5" />
+          <path d="M190 131 C 194 135, 194 142, 190 145" stroke="#D97706" strokeWidth="2" fill="none" />
 
-          {/* Cheerful Head / Face Oval */}
-          <ellipse cx="110" cy="118" rx="42" ry="42" fill="#FDE68A" />
+          {/* Cheerful Round Cartoon Face */}
+          <ellipse cx="140" cy="138" rx="46" ry="44" fill="url(#skinGrad)" stroke="#D97706" strokeWidth="1" />
 
-          {/* ============================================================== */}
-          {/* 3. ICONIC LARGE TRADITIONAL RED/CRIMSON PAGRI (TURBAN) */}
-          {/* ============================================================== */}
-          
-          {/* Main Turban Crown Silhouette (High arched traditional wrap) */}
+          {/* White Hair Tuft on Forehead (Classic Chacha Detail) */}
           <path
-            d="M48 95 C 44 48, 75 20, 110 20 C 145 20, 176 48, 172 95 C 175 105, 150 110, 110 110 C 70 110, 45 105, 48 95 Z"
+            d="M125 106 C 130 94, 142 94, 148 106 C 140 102, 132 102, 125 106 Z"
+            fill="#FFFFFF"
+          />
+
+          {/* ============================================================== */}
+          {/* 3. ICONIC RED TURBAN WITH FAN-CREST (TURRA) & SCARF */}
+          {/* ============================================================== */}
+
+          {/* Trailing Red Turban Scarf over left shoulder */}
+          <path
+            d="M95 180 C 65 190, 50 205, 52 230 C 75 220, 100 205, 118 190 Z"
             fill="#DC2626"
-          />
-          {/* Turban top crest layer (bulbous authentic pagri drape) */}
-          <path
-            d="M58 80 C 52 38, 80 18, 114 18 C 150 18, 170 38, 164 80 C 158 52, 120 30, 92 40 C 70 48, 60 65, 58 80 Z"
-            fill="#B91C1C"
-          />
-          {/* Layered folds and pleated fabric wraps across forehead */}
-          <path
-            d="M48 92 C 72 75, 148 72, 172 92"
             stroke="#991B1B"
+            strokeWidth="1.5"
+          />
+          <path
+            d="M52 230 C 75 210, 100 200, 122 188"
+            stroke="#B91C1C"
+            strokeWidth="2"
+            fill="none"
+          />
+
+          {/* Prominent Pleated Fan-Crest (Turra / कलंगी) rising at top left */}
+          <path
+            d="M92 90 C 82 50, 80 30, 94 24 C 104 20, 112 36, 120 28 C 128 22, 138 28, 140 38 C 142 50, 134 76, 128 92 Z"
+            fill="url(#turraGrad)"
+            stroke="#7F1D1D"
+            strokeWidth="2"
+          />
+          {/* Fan-crest pleat lines */}
+          <path d="M108 90 L96 26" stroke="#991B1B" strokeWidth="2" />
+          <path d="M114 90 L118 30" stroke="#991B1B" strokeWidth="2" />
+          <path d="M120 90 L136 34" stroke="#991B1B" strokeWidth="2" />
+          <path d="M102 92 C 100 84, 124 84, 126 92" stroke="#FACC15" strokeWidth="3" fill="none" />
+
+          {/* Main Arched Red Turban Silhouette */}
+          <path
+            d="M72 110 C 66 56, 104 28, 142 28 C 182 28, 214 56, 208 110 C 212 122, 185 128, 140 128 C 95 128, 68 122, 72 110 Z"
+            fill="url(#turbanGrad)"
+            stroke="#991B1B"
+            strokeWidth="2"
+          />
+
+          {/* Rich Curved Turban Wraps and Folds */}
+          <path
+            d="M72 106 C 105 85, 175 82, 208 106"
+            stroke="#7F1D1D"
             strokeWidth="4"
             fill="none"
             strokeLinecap="round"
           />
           <path
-            d="M52 82 C 78 62, 142 62, 168 82"
-            stroke="#7F1D1D"
+            d="M78 94 C 110 72, 170 70, 202 94"
+            stroke="#991B1B"
             strokeWidth="3.5"
             fill="none"
             strokeLinecap="round"
           />
           <path
-            d="M62 68 C 85 50, 135 50, 158 68"
-            stroke="#991B1B"
+            d="M88 78 C 118 58, 162 58, 192 78"
+            stroke="#7F1D1D"
             strokeWidth="3"
             fill="none"
             strokeLinecap="round"
           />
           <path
-            d="M72 52 C 92 38, 128 38, 148 52"
-            stroke="#7F1D1D"
+            d="M102 60 C 126 48, 154 48, 178 60"
+            stroke="#991B1B"
             strokeWidth="2.5"
             fill="none"
             strokeLinecap="round"
           />
 
-          {/* Turban Golden Brooch / Central Namami Gange Badge */}
-          <circle cx="110" cy="74" r="8" fill="#FACC15" stroke="#B45309" strokeWidth="2" />
-          <circle cx="110" cy="74" r="4" fill="#0284C7" />
-          <circle cx="110" cy="74" r="1.5" fill="#FFFFFF" />
+          {/* ============================================================== */}
+          {/* 4. FACIAL EXPRESSIONS: EYEBROWS, BIG SHINY EYES, BUTTON NOSE */}
+          {/* ============================================================== */}
 
-          {/* ============================================================== */}
-          {/* 4. FACIAL FEATURES: EYEBROWS, EYES, NOSE, WRINKLES */}
-          {/* ============================================================== */}
-          
-          {/* Expressive Thick White/Gray Eyebrows */}
+          {/* Arched Expressive Thin Black Eyebrows */}
           <path
             d={
               state === 'listening'
-                ? 'M82 96 Q 94 88 102 95'
-                : 'M82 98 Q 94 92 102 98'
+                ? 'M108 116 Q 120 108 130 115'
+                : 'M108 118 Q 120 112 130 118'
             }
-            stroke="#FFFFFF"
-            strokeWidth="4"
+            stroke="#1F2937"
+            strokeWidth="3.5"
             strokeLinecap="round"
           />
           <path
             d={
               state === 'listening'
-                ? 'M118 95 Q 126 88 138 96'
-                : 'M118 98 Q 126 92 138 98'
+                ? 'M150 115 Q 160 108 172 116'
+                : 'M150 118 Q 160 112 172 118'
             }
-            stroke="#FFFFFF"
-            strokeWidth="4"
+            stroke="#1F2937"
+            strokeWidth="3.5"
             strokeLinecap="round"
           />
 
           {/* Big Expressive Cartoon Eyes */}
-          <ellipse cx="92" cy="108" rx="7" ry="8" fill="#FFFFFF" stroke="#1F2937" strokeWidth="1.5" />
-          <circle cx="93" cy="108" r={state === 'listening' ? '4.5' : '4'} fill="#1F2937" />
-          <circle cx="95" cy="106" r="1.8" fill="#FFFFFF" />
+          <ellipse cx="120" cy="128" rx="8.5" ry="9.5" fill="#FFFFFF" stroke="#1F2937" strokeWidth="2" />
+          <circle cx="121" cy="128" r={state === 'listening' ? '5.5' : '5'} fill="#1F2937" />
+          <circle cx="123" cy="126" r="2.2" fill="#FFFFFF" />
 
-          <ellipse cx="128" cy="108" rx="7" ry="8" fill="#FFFFFF" stroke="#1F2937" strokeWidth="1.5" />
-          <circle cx="127" cy="108" r={state === 'listening' ? '4.5' : '4'} fill="#1F2937" />
-          <circle cx="129" cy="106" r="1.8" fill="#FFFFFF" />
+          <ellipse cx="160" cy="128" rx="8.5" ry="9.5" fill="#FFFFFF" stroke="#1F2937" strokeWidth="2" />
+          <circle cx="159" cy="128" r={state === 'listening' ? '5.5' : '5'} fill="#1F2937" />
+          <circle cx="161" cy="126" r="2.2" fill="#FFFFFF" />
 
-          {/* Round Friendly Nose */}
-          <ellipse cx="110" cy="118" rx="6.5" ry="8" fill="#F59E0B" stroke="#D97706" strokeWidth="1" />
+          {/* Round Friendly Button Nose */}
+          <ellipse cx="140" cy="138" rx="7.5" ry="9" fill="#FB923C" stroke="#EA580C" strokeWidth="1.5" />
 
           {/* ============================================================== */}
-          {/* 5. ANIMATED MOUTH (LIP-SYNC UNDERNEATH MOUSTACHE) */}
+          {/* 5. ANIMATED OPEN MOUTH (LIP-SYNC UNDERNEATH MOUSTACHE) */}
           {/* ============================================================== */}
-          
           {state === 'speaking' ? (
             <g>
-              {/* Mouth Cavity with dynamic opening and closing */}
+              {/* Dynamic Lip-Sync Mouth Opening */}
               <motion.ellipse
-                cx="110"
-                cy="142"
+                cx="140"
+                cy="164"
                 animate={{
-                  rx: [5, 9, 6, 10, 5],
-                  ry: [3, 9, 4, 11, 3],
+                  rx: [5, 10, 6, 12, 5],
+                  ry: [3, 10, 4, 12, 3],
                 }}
                 transition={{
                   repeat: Infinity,
@@ -327,11 +447,11 @@ export const Mascot = ({
               />
               {/* Tongue accent */}
               <motion.ellipse
-                cx="110"
-                cy="146"
+                cx="140"
+                cy="168"
                 animate={{
-                  rx: [3, 5, 4, 6, 3],
-                  ry: [1.5, 3.5, 2, 4, 1.5],
+                  rx: [3, 6, 4, 7, 3],
+                  ry: [1.5, 4, 2, 5, 1.5],
                 }}
                 transition={{
                   repeat: Infinity,
@@ -342,90 +462,75 @@ export const Mascot = ({
               />
             </g>
           ) : state === 'listening' ? (
-            <ellipse cx="110" cy="140" rx="4.5" ry="3" fill="#991B1B" />
+            <ellipse cx="140" cy="162" rx="5" ry="3.5" fill="#991B1B" />
           ) : (
-            /* Cheerful smiling mouth line */
-            <path
-              d={
-                state === 'celebrating' || state === 'happy'
-                  ? 'M98 138 Q 110 152 122 138'
-                  : 'M100 138 Q 110 146 120 138'
-              }
-              stroke="#991B1B"
-              strokeWidth="3"
-              fill="none"
-              strokeLinecap="round"
-            />
+            /* Open cheerful cartoon smile with pink tongue */
+            <g>
+              <path
+                d="M125 158 Q 140 178 155 158 Z"
+                fill="#991B1B"
+                stroke="#7F1D1D"
+                strokeWidth="1.5"
+              />
+              <path
+                d="M130 166 Q 140 176 150 166 Z"
+                fill="#FB7185"
+              />
+            </g>
           )}
 
           {/* ============================================================== */}
-          {/* 6. ICONIC LONG CURVED WHITE MOUSTACHE (PROMINENT & SWEEPING) */}
+          {/* 6. MAGNIFICENT SWEEPING WHITE MOUSTACHE (UPWARD-CURVED WINGS) */}
           {/* ============================================================== */}
-          
           <motion.g
             animate={
               state === 'speaking'
-                ? { y: [0, -1.8, 0, -1.2, 0] }
+                ? { y: [0, -2, 0, -1.2, 0] }
                 : { y: 0 }
             }
             transition={{ repeat: Infinity, duration: 0.28, ease: 'easeInOut' }}
           >
-            {/* Moustache Base Shadow */}
+            {/* Shadow under Moustache */}
             <path
-              d="M110 124 C 98 120, 68 122, 54 140 C 70 140, 96 135, 110 129 C 124 135, 150 140, 166 140 C 152 122, 122 120, 110 124 Z"
-              fill="#E2E8F0"
+              d="M140 144 C 126 138, 86 138, 70 162 C 90 162, 122 156, 140 149 C 158 156, 190 162, 210 162 C 194 138, 154 138, 140 144 Z"
+              fill="#CBD5E1"
             />
-            {/* Main Thick Sweeping White Moustache */}
+            {/* Main Pure-White Sweeping Moustache with Upward-Curved Wing Tips */}
             <path
-              d="M110 122 C 96 117, 66 119, 52 138 C 70 138, 98 132, 110 126 C 122 132, 150 138, 168 138 C 154 119, 124 117, 110 122 Z"
+              d="M140 142 C 124 136, 84 136, 68 160 C 88 160, 124 152, 140 146 C 156 152, 192 160, 212 160 C 196 136, 156 136, 140 142 Z"
               fill="#FFFFFF"
-              stroke="#CBD5E1"
+              stroke="#94A3B8"
               strokeWidth="2"
               strokeLinejoin="round"
             />
-            {/* Moustache central parting line & texture */}
-            <path
-              d="M110 122 L110 126"
-              stroke="#94A3B8"
-              strokeWidth="1.5"
-            />
-            <path
-              d="M74 130 C 88 128, 102 125, 110 124 C 118 125, 132 128, 146 130"
-              stroke="#F1F5F9"
-              strokeWidth="1.5"
-              fill="none"
-            />
+            {/* Center parting & feather stroke */}
+            <line x1="140" y1="142" x2="140" y2="146" stroke="#64748B" strokeWidth="1.5" />
+            <path d="M96 150 C 114 146, 130 144, 140 144 C 150 144, 166 146, 184 150" stroke="#F1F5F9" strokeWidth="1.8" fill="none" />
           </motion.g>
 
-          {/* Chin Definition */}
-          <path
-            d="M102 154 Q 110 158 118 154"
-            stroke="#F59E0B"
-            strokeWidth="2"
-            fill="none"
-            strokeLinecap="round"
-          />
+          {/* Chin definition */}
+          <path d="M130 176 Q 140 182 150 176" stroke="#EA580C" strokeWidth="2" fill="none" strokeLinecap="round" />
 
           {/* ============================================================== */}
           {/* 7. STATE OVERLAYS (LISTENING / THINKING / SPEAKING) */}
           {/* ============================================================== */}
-          
-          {/* LISTENING INDICATOR OVERLAY (Microphone badge on ear) */}
+
+          {/* LISTENING INDICATOR OVERLAY */}
           {state === 'listening' && (
-            <g transform="translate(156, 76)">
-              <circle cx="13" cy="13" r="15" fill="#FFE4E6" stroke="#F43F5E" strokeWidth="2.5" />
-              <rect x="10.5" y="7" width="5" height="8.5" rx="2.5" fill="#E11D48" />
-              <path d="M8 11 C 8 15.5, 18 15.5, 18 11" stroke="#E11D48" strokeWidth="1.8" fill="none" />
-              <line x1="13" y1="15.5" x2="13" y2="19" stroke="#E11D48" strokeWidth="1.8" />
+            <g transform="translate(195, 95)">
+              <circle cx="14" cy="14" r="16" fill="#FFE4E6" stroke="#F43F5E" strokeWidth="3" />
+              <rect x="11.5" y="7.5" width="5" height="9" rx="2.5" fill="#E11D48" />
+              <path d="M8.5 12 C 8.5 17, 19.5 17, 19.5 12" stroke="#E11D48" strokeWidth="2" fill="none" />
+              <line x1="14" y1="17" x2="14" y2="21" stroke="#E11D48" strokeWidth="2" />
             </g>
           )}
 
           {/* THINKING BRAIN INDICATOR OVERLAY */}
           {state === 'thinking' && (
-            <g transform="translate(156, 30)">
-              <circle cx="13" cy="13" r="15" fill="#FEF08A" stroke="#CA8A04" strokeWidth="2.5" />
+            <g transform="translate(195, 45)">
+              <circle cx="14" cy="14" r="16" fill="#FEF08A" stroke="#CA8A04" strokeWidth="3" />
               <path
-                d="M8 13 Q 13 7 18 13 Q 13 19 8 13"
+                d="M8.5 14 Q 14 7.5 19.5 14 Q 14 20.5 8.5 14"
                 stroke="#854D0E"
                 strokeWidth="2.5"
                 fill="none"
@@ -435,34 +540,34 @@ export const Mascot = ({
 
           {/* SPEAKING AUDIO WAVES OVERLAY */}
           {state === 'speaking' && (
-            <g transform="translate(160, 105)">
-              <circle cx="12" cy="12" r="14" fill="#D1FAE5" stroke="#059669" strokeWidth="2" />
-              <path d="M8 7 Q 13 12 8 17" stroke="#047857" strokeWidth="2.2" fill="none" strokeLinecap="round" />
-              <path d="M12 5 Q 18 12 12 19" stroke="#047857" strokeWidth="2.2" fill="none" strokeLinecap="round" />
+            <g transform="translate(200, 130)">
+              <circle cx="13" cy="13" r="15" fill="#D1FAE5" stroke="#059669" strokeWidth="2.5" />
+              <path d="M8.5 7.5 Q 14 13 8.5 18.5" stroke="#047857" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+              <path d="M13 5 Q 19.5 13 13 21" stroke="#047857" strokeWidth="2.5" fill="none" strokeLinecap="round" />
             </g>
           )}
         </svg>
 
         {/* Mascot Mode Tag Badge */}
-        <div className="absolute -bottom-1 -right-1 bg-white/95 border border-slate-200 text-[10px] font-bold text-slate-700 px-2.5 py-0.5 rounded-full shadow-md flex items-center gap-1.5 z-20">
+        <div className="absolute -bottom-1 -right-1 bg-white/95 border border-slate-200 text-[11px] font-bold text-slate-800 px-3 py-0.5 rounded-full shadow-lg flex items-center gap-1.5 z-20">
           <span
-            className={`w-2 h-2 rounded-full ${
+            className={`w-2.5 h-2.5 rounded-full ${
               state === 'listening'
                 ? 'bg-rose-500 animate-ping'
                 : state === 'speaking'
                 ? 'bg-emerald-500 animate-pulse'
-                : 'bg-sacred-saffron'
+                : 'bg-emerald-500'
             }`}
           />
-          <span>{state === 'listening' ? 'Listening' : state === 'speaking' ? 'Speaking' : 'Chacha Chaudhary'}</span>
+          <span>{state === 'listening' ? 'Listening' : state === 'speaking' ? 'Speaking' : 'AI Mascot'}</span>
         </div>
       </motion.div>
 
       {/* State Status Pill */}
       <div
-        className={`mt-3 inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-semibold border ${currentBadge.color} transition-all duration-300`}
+        className={`mt-4 inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold border shadow-xs ${currentBadge.color} transition-all duration-300`}
       >
-        <BadgeIcon className="w-3.5 h-3.5" />
+        <BadgeIcon className="w-4 h-4 text-sacred-saffron" />
         <span>{currentBadge.text}</span>
       </div>
     </div>
