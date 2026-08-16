@@ -26,24 +26,13 @@ export const Navbar = () => {
     <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200/80 shadow-xs">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16 sm:h-20">
-          {/* Logo & Brand */}
-          <Link to="/" className="flex items-center gap-3 group">
-            <div className="w-10 h-10 rounded-2xl bg-gradient-to-tr from-ganga-700 to-ganga-500 text-white flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
-              <span className="text-xl">🌊</span>
-            </div>
-            <div>
-              <div className="flex items-center gap-1.5">
-                <span className="font-extrabold text-lg sm:text-xl tracking-tight text-slate-900">
-                  Ganga<span className="text-ganga-600">Mitra</span>
-                </span>
-                <span className="bg-sacred-saffron/15 text-amber-900 border border-sacred-saffron/30 text-[10px] font-bold px-1.5 py-0.5 rounded-md">
-                  SIH1290
-                </span>
-              </div>
-              <p className="text-[10px] text-slate-500 hidden sm:block">
-                Chacha Chaudhary AI Avatar
-              </p>
-            </div>
+          {/* Official Logo & Brand */}
+          <Link to="/" className="flex items-center gap-2.5 group py-1">
+            <img
+              src="/logo.png"
+              alt="GangaMitra — Chacha Chaudhary AI Avatar (SIH1290)"
+              className="h-10 sm:h-12 w-auto object-contain transition-transform group-hover:scale-105 drop-shadow-xs"
+            />
           </Link>
 
           {/* Desktop Navigation Links */}

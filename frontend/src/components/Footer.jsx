@@ -13,13 +13,11 @@ export const Footer = () => {
           {/* Brand Col */}
           <div className="md:col-span-2 space-y-4">
             <div className="flex items-center gap-3">
-              <span className="text-2xl">🌊</span>
-              <span className="font-extrabold text-xl text-white tracking-tight">
-                Ganga<span className="text-ganga-400">Mitra</span>
-              </span>
-              <span className="bg-ganga-500/20 text-ganga-300 border border-ganga-500/30 text-[10px] font-bold px-2 py-0.5 rounded-full">
-                SIH1290
-              </span>
+              <img
+                src="/logo.png"
+                alt="GangaMitra Logo"
+                className="h-12 w-auto object-contain bg-white/95 p-1 rounded-xl shadow-md"
+              />
             </div>
             <p className="text-xs sm:text-sm text-slate-400 max-w-sm leading-relaxed">
               AI, ML and Chatbot-powered Interactive Robot Mascot (Chacha Chaudhary) and digital
