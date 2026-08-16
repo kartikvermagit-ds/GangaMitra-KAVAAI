@@ -42,7 +42,7 @@ export const Chat = () => {
       if (recognitionRef.current) {
         try {
           recognitionRef.current.abort();
-        } catch (e) {}
+        } catch (e) { }
       }
     };
   }, []);
@@ -58,7 +58,7 @@ export const Chat = () => {
     if (recognitionRef.current) {
       try {
         recognitionRef.current.abort();
-      } catch (e) {}
+      } catch (e) { }
     }
     setIsListening(false);
 
@@ -132,7 +132,7 @@ export const Chat = () => {
     if (recognitionRef.current) {
       try {
         recognitionRef.current.abort();
-      } catch (e) {}
+      } catch (e) { }
     }
     setIsListening(false);
     setInterimSpeech('');
@@ -165,7 +165,7 @@ export const Chat = () => {
       if (recognitionRef.current) {
         try {
           recognitionRef.current.abort();
-        } catch (e) {}
+        } catch (e) { }
       }
       setIsListening(false);
       setInterimSpeech('');
@@ -228,20 +228,19 @@ export const Chat = () => {
         <div className="mb-6 flex flex-col sm:flex-row items-center justify-between gap-3 bg-white p-3.5 rounded-2xl border border-slate-200 shadow-xs">
           <div className="flex items-center gap-2 text-xs font-semibold text-ganga-800">
             <span
-              className={`w-2 h-2 rounded-full ${
-                mascotState === 'listening'
+              className={`w-2 h-2 rounded-full ${mascotState === 'listening'
                   ? 'bg-rose-500 animate-ping'
                   : mascotState === 'speaking'
-                  ? 'bg-emerald-500 animate-pulse'
-                  : 'bg-ganga-500'
-              }`}
+                    ? 'bg-emerald-500 animate-pulse'
+                    : 'bg-ganga-500'
+                }`}
             />
             <span>
               {mascotState === 'listening'
                 ? 'Listening to your voice...'
                 : mascotState === 'speaking'
-                ? 'Chacha is speaking with voice...'
-                : 'SIH1290 Digital Avatar Live Session'}
+                  ? 'Chacha is speaking with voice...'
+                  : 'SIH1290 Digital Avatar Live Session'}
             </span>
           </div>
           <div className="flex items-center gap-2 text-xs text-slate-500">
@@ -257,13 +256,12 @@ export const Chat = () => {
             initial={{ opacity: 0, x: -15 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.4 }}
-            className={`lg:col-span-5 flex flex-col items-center justify-center bg-white rounded-3xl p-6 sm:p-8 border shadow-lg text-center transition-all duration-300 ${
-              mascotState === 'listening'
+            className={`lg:col-span-5 flex flex-col items-center justify-center bg-white rounded-3xl p-6 sm:p-8 border shadow-lg text-center transition-all duration-300 ${mascotState === 'listening'
                 ? 'border-rose-300 ring-2 ring-rose-200 shadow-rose-100'
                 : mascotState === 'speaking'
-                ? 'border-emerald-300 ring-2 ring-emerald-200 shadow-emerald-100'
-                : 'border-slate-200/80'
-            }`}
+                  ? 'border-emerald-300 ring-2 ring-emerald-200 shadow-emerald-100'
+                  : 'border-slate-200/80'
+              }`}
           >
             <div className="mb-2">
               <span className="text-xs font-bold uppercase tracking-wider text-sacred-saffron">
@@ -283,8 +281,8 @@ export const Chat = () => {
                   ? interimSpeech
                     ? `"${interimSpeech}..."`
                     : language === 'hi'
-                    ? 'मैं सुन रहा हूँ, कृपया अपना सवाल बोलें...'
-                    : "I'm listening, please ask your question..."
+                      ? 'मैं सुन रहा हूँ, कृपया अपना सवाल बोलें...'
+                      : "I'm listening, please ask your question..."
                   : null
               }
               onClick={() => {
