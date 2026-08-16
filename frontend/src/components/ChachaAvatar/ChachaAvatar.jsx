@@ -3,11 +3,11 @@ import { motion } from 'framer-motion';
 import { Sparkles, Brain, Volume2, Award, HeartHandshake, Mic } from 'lucide-react';
 
 /**
- * Original Beloved Chacha Chaudhary Mascot Avatar with Refined Lip-Sync
+ * Original Beloved Chacha Chaudhary Mascot Avatar with Vivid Talking Lip-Sync
  * Features:
- * - Mouth cavity rendered underneath the iconic white mustache for realistic cartoon lip-sync
- * - Natural syllable timing and phonetic mouth variation
- * - Full interactive states: IDLE, LISTENING, THINKING, SPEAKING, HAPPY, CELEBRATING
+ * - Perfectly positioned and animated open/close mouth with teeth & tongue
+ * - Mustache frames mouth with synchronized speech vibration
+ * - Active TTS audio synchronization
  */
 export const ChachaAvatar = ({
   state = 'idle',
@@ -82,7 +82,7 @@ export const ChachaAvatar = ({
             : state === 'thinking'
             ? { y: [0, -6, 0], rotate: [-1, 1, -1] }
             : state === 'speaking'
-            ? { scale: [1, 1.02, 1], y: [0, -2, 0] }
+            ? { scale: [1, 1.025, 1], y: [0, -2, 0] }
             : state === 'celebrating'
             ? { y: [0, -12, 0], scale: [1, 1.05, 1] }
             : { y: [0, -5, 0] }
@@ -231,61 +231,72 @@ export const ChachaAvatar = ({
           <ellipse cx="100" cy="108" rx="4.5" ry="6" fill="#F6AD55" />
 
           {/* ============================================================== */}
-          {/* MOUTH CAVITY (Rendered UNDERNEATH the Mustache for Real Lip-Sync) */}
+          {/* VIVID LIP-SYNC MOUTH (Layered under mustache with teeth & tongue) */}
           {/* ============================================================== */}
           {state === 'speaking' ? (
             <g>
-              {/* Dynamic Lip-Sync Mouth Opening */}
+              {/* Dynamic open/close mouth cavity */}
               <motion.ellipse
                 cx="100"
-                cy="123"
+                cy="128"
                 animate={{
-                  rx: [4, 6.5, 4.5, 7.5, 4],
-                  ry: [2, 6.5, 2.5, 7.5, 2],
+                  rx: [4, 7.5, 5, 8.5, 4],
+                  ry: [2, 8, 3, 9.5, 2],
                 }}
                 transition={{
                   repeat: Infinity,
-                  duration: 0.26,
+                  duration: 0.28,
                   ease: 'easeInOut',
                 }}
-                fill="#881337"
-                stroke="#9F1239"
+                fill="#7F1D1D"
+                stroke="#991B1B"
                 strokeWidth="1"
+              />
+              {/* Upper Teeth */}
+              <motion.rect
+                x="96.5"
+                y="122.5"
+                width="7"
+                height="2.5"
+                rx="1"
+                fill="#FFFFFF"
+                animate={{ opacity: [0.8, 1, 0.8] }}
+                transition={{ repeat: Infinity, duration: 0.28 }}
               />
               {/* Animated pink tongue */}
               <motion.ellipse
                 cx="100"
-                cy="126"
+                cy="132"
                 animate={{
-                  rx: [2.5, 4, 3, 4.5, 2.5],
-                  ry: [1, 2.5, 1.2, 3, 1],
+                  rx: [2.5, 4.5, 3, 5.5, 2.5],
+                  ry: [1, 3.5, 1.8, 4.5, 1],
                 }}
                 transition={{
                   repeat: Infinity,
-                  duration: 0.26,
+                  duration: 0.28,
                   ease: 'easeInOut',
                 }}
                 fill="#FB7185"
               />
             </g>
           ) : state === 'listening' ? (
-            <ellipse cx="100" cy="123" rx="3.5" ry="2" fill="#991B1B" />
+            <ellipse cx="100" cy="126" rx="4" ry="2.5" fill="#991B1B" />
           ) : (
             <path
               d={
                 state === 'celebrating' || state === 'happy'
-                  ? 'M92 122 Q 100 132 108 122'
-                  : 'M94 122 Q 100 128 106 122'
+                  ? 'M90 125 Q 100 138 110 125'
+                  : 'M93 125 Q 100 132 107 125'
               }
               stroke="#991B1B"
-              strokeWidth="2"
+              strokeWidth="2.5"
               fill="none"
               strokeLinecap="round"
             />
           )}
 
           {/* ============================================================== */}
-          {/* ICONIC WHITE MUSTACHE (Layered Gracefully ON TOP of the Mouth) */}
+          {/* ICONIC WHITE MUSTACHE (Framing the Mouth with Speech Bob)       */}
           {/* ============================================================== */}
           <motion.path
             d="M100 114 C 92 110, 72 112, 68 126 C 78 126, 92 122, 100 117 C 108 122, 122 126, 132 126 C 128 112, 108 110, 100 114 Z"
@@ -294,10 +305,10 @@ export const ChachaAvatar = ({
             strokeWidth="1.5"
             animate={
               state === 'speaking'
-                ? { y: [0, -1.2, 0, -1.8, 0] }
+                ? { y: [0, -1.5, 0, -2, 0] }
                 : { y: 0 }
             }
-            transition={{ repeat: Infinity, duration: 0.26, ease: 'easeInOut' }}
+            transition={{ repeat: Infinity, duration: 0.28, ease: 'easeInOut' }}
           />
 
           {/* LISTENING INDICATOR OVERLAY (Microphone on ear) */}
