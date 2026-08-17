@@ -44,62 +44,74 @@ export const startVoiceRecognition = ({
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   const recognition = new SpeechRecognition();
 
-  let hasResult = false;
+  let accumulatedFinal = '';
+  let lastInterim = '';
+  let hasDispatchedResult = false;
 
   recognition.continuous = false;
   recognition.interimResults = true;
+  // Match language explicitly: Hindi ('hi-IN') or Indian English ('en-IN')
   recognition.lang = language === 'hi' ? 'hi-IN' : 'en-IN';
-  recognition.maxAlternatives = 1;
+  recognition.maxAlternatives = 3;
 
   recognition.onstart = () => {
-    hasResult = false;
+    accumulatedFinal = '';
+    lastInterim = '';
+    hasDispatchedResult = false;
     onStart && onStart();
   };
 
   recognition.onresult = (event) => {
-    let interimTranscript = '';
-    let finalTranscript = '';
+    let currentInterim = '';
 
     for (let i = event.resultIndex; i < event.results.length; ++i) {
+      const transcript = event.results[i][0]?.transcript || '';
       if (event.results[i].isFinal) {
-        finalTranscript += event.results[i][0].transcript;
+        accumulatedFinal += (accumulatedFinal ? ' ' : '') + transcript.trim();
       } else {
-        interimTranscript += event.results[i][0].transcript;
+        currentInterim += (currentInterim ? ' ' : '') + transcript;
       }
     }
 
-    if (interimTranscript && onInterimResult) {
-      onInterimResult(interimTranscript);
+    lastInterim = currentInterim;
+
+    if (currentInterim && onInterimResult) {
+      onInterimResult(accumulatedFinal ? `${accumulatedFinal} ${currentInterim}` : currentInterim);
     }
 
-    if (finalTranscript) {
-      hasResult = true;
-      onResult && onResult(finalTranscript.trim());
+    if (accumulatedFinal) {
+      hasDispatchedResult = true;
+      onResult && onResult(accumulatedFinal.trim());
     }
   };
 
   recognition.onerror = (event) => {
     if (event.error === 'aborted') {
-      onEnd && onEnd();
+      onEnd && onEnd(hasDispatchedResult);
       return;
     }
 
     let errorMsg = 'Error during voice recognition';
     if (event.error === 'not-allowed' || event.error === 'permission-denied') {
-      errorMsg = 'Microphone permission was denied. Please click the lock icon in your browser address bar and allow Microphone access.';
+      errorMsg = 'Microphone permission denied. Please allow microphone access in your browser.';
     } else if (event.error === 'no-speech') {
-      errorMsg = 'No voice detected. Please try speaking again into your microphone.';
+      errorMsg = 'No voice detected. Please try speaking closer to your microphone.';
     } else if (event.error === 'audio-capture') {
-      errorMsg = 'No microphone was found. Please ensure your microphone is plugged in and working.';
+      errorMsg = 'No microphone found. Please check your audio input device.';
     } else if (event.error === 'network') {
-      errorMsg = 'Network error: Web Speech API requires an internet connection.';
+      errorMsg = 'Speech Recognition network error: Your college/hostel firewall may be blocking Google Speech servers. Try using Google DNS (8.8.8.8 / 1.1.1.1) or type your query.';
     }
 
     onError && onError(errorMsg, event.error);
   };
 
   recognition.onend = () => {
-    onEnd && onEnd(hasResult);
+    // If recognition ended before a final event, but we have captured interim speech, send it!
+    if (!hasDispatchedResult && lastInterim && lastInterim.trim()) {
+      hasDispatchedResult = true;
+      onResult && onResult(lastInterim.trim());
+    }
+    onEnd && onEnd(hasDispatchedResult);
   };
 
   try {
