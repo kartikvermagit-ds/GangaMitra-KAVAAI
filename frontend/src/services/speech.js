@@ -1,6 +1,6 @@
 /**
  * Speech Recognition and Text-to-Speech Service for GangaMitra
- * Refined for authentic, warm Chacha Chaudhary voice tone and accurate phoneme lip-sync.
+ * Optimized for mobile Android WebView and Web browsers with reliable audio playback.
  */
 
 // Check browser support
@@ -14,14 +14,23 @@ export const isSpeechSynthesisSupported = () => {
 
 // Preload and cache voices
 let cachedVoices = [];
+const loadVoices = () => {
+  if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+    const list = window.speechSynthesis.getVoices();
+    if (list && list.length > 0) {
+      cachedVoices = list;
+    }
+  }
+};
+
 if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-  cachedVoices = window.speechSynthesis.getVoices();
+  loadVoices();
   window.speechSynthesis.onvoiceschanged = () => {
-    cachedVoices = window.speechSynthesis.getVoices();
+    loadVoices();
   };
 }
 
-// Module-level reference to prevent Chromium garbage collection of active utterance
+// Module-level reference to prevent Chromium/Android garbage collection
 let activeUtterance = null;
 let keepAliveTimer = null;
 
@@ -50,6 +59,14 @@ export const startVoiceRecognition = ({
         'unsupported'
       );
     return null;
+  }
+
+  // Pre-unlock speech synthesis when mic is clicked
+  if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
+    try {
+      window.speechSynthesis.resume();
+      loadVoices();
+    } catch (e) {}
   }
 
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
@@ -103,13 +120,13 @@ export const startVoiceRecognition = ({
 
     let errorMsg = 'Error during voice recognition';
     if (event.error === 'not-allowed' || event.error === 'permission-denied') {
-      errorMsg = 'Microphone permission denied. Please allow microphone access in your browser.';
+      errorMsg = 'Microphone permission denied. Please allow microphone access in your browser/app settings.';
     } else if (event.error === 'no-speech') {
-      errorMsg = 'No voice detected. Please try speaking closer to your microphone.';
+      errorMsg = 'No voice detected. Please speak closer to your microphone.';
     } else if (event.error === 'audio-capture') {
-      errorMsg = 'No microphone found. Please check your audio input device.';
+      errorMsg = 'No microphone found. Please check your audio device.';
     } else if (event.error === 'network') {
-      errorMsg = 'Speech Recognition network error. Please check your internet connection or type your query.';
+      errorMsg = 'Speech Recognition network error. Please check your internet connection.';
     }
 
     onError && onError(errorMsg, event.error);
@@ -123,7 +140,6 @@ export const startVoiceRecognition = ({
 
     const fullTranscript = (accumulatedFinal || lastInterim || '').trim();
 
-    // If non-empty speech was captured and not yet dispatched, send it now
     if (!hasDispatchedResult && fullTranscript.length > 0) {
       hasDispatchedResult = true;
       onResult && onResult(fullTranscript);
@@ -149,20 +165,16 @@ export const startVoiceRecognition = ({
 };
 
 /**
- * Finds the most authentic, mature, warm voice for Chacha Chaudhary
+ * Finds best voice for authentic Indian avatar
  */
 const findBestVoice = (isHindi) => {
-  const voices =
-    cachedVoices.length > 0
-      ? cachedVoices
-      : typeof window !== 'undefined' && 'speechSynthesis' in window
-      ? window.speechSynthesis.getVoices()
-      : [];
-
-  if (voices.length === 0) return null;
+  if (cachedVoices.length === 0) {
+    loadVoices();
+  }
+  const voices = cachedVoices;
+  if (!voices || voices.length === 0) return null;
 
   if (isHindi) {
-    // 1. Prefer male / natural Hindi voices for authentic Chacha Chaudhary character
     return (
       voices.find(
         (v) =>
@@ -183,7 +195,6 @@ const findBestVoice = (isHindi) => {
     );
   }
 
-  // 2. Prefer warm Indian English voices
   return (
     voices.find(
       (v) =>
@@ -206,21 +217,20 @@ const findBestVoice = (isHindi) => {
 };
 
 /**
- * Clean text for natural, conversational speech (removes formatting & weird symbols)
+ * Clean text for natural speech
  */
 const sanitizeSpeechText = (raw) => {
   return raw
-    .replace(/[#*_`~[\]()]/g, '') // remove markdown symbols
-    .replace(/https?:\/\/\S+/g, '') // remove URLs
-    .replace(/[-–—]/g, ' ') // replace hyphens/dashes with pauses
-    .replace(/[^\w\s\u0900-\u097F.,!?।]/g, ' ') // keep letters, numbers, devanagari & basic punctuation
-    .replace(/\s+/g, ' ') // normalize whitespace
+    .replace(/[#*_`~[\]()]/g, '')
+    .replace(/https?:\/\/\S+/g, '')
+    .replace(/[-–—]/g, ' ')
+    .replace(/[^\w\s\u0900-\u097F.,!?।]/g, ' ')
+    .replace(/\s+/g, ' ')
     .trim();
 };
 
 /**
- * Speaks text using window.speechSynthesis with custom Chacha tone tuning
- * and strictly bound lifecycle events.
+ * Speaks text using window.speechSynthesis with Android & Chrome compatibility
  */
 export const speakText = ({
   text,
@@ -235,7 +245,6 @@ export const speakText = ({
   }
 
   try {
-    // Cancel any ongoing speech to prevent overlap
     stopSpeaking();
 
     const cleanText = sanitizeSpeechText(text);
@@ -244,16 +253,13 @@ export const speakText = ({
       return null;
     }
 
-    // Auto-detect Hindi script (Devanagari \u0900-\u097F)
     const containsDevanagari = /[\u0900-\u097F]/.test(cleanText);
     const isHindi = language === 'hi' || containsDevanagari;
 
     const utterance = new SpeechSynthesisUtterance(cleanText);
     utterance.lang = isHindi ? 'hi-IN' : 'en-IN';
-
-    // Tone settings for a wise, warm, grandfatherly Indian mascot
-    utterance.rate = isHindi ? 0.90 : 0.95; // Slightly relaxed, clear pacing
-    utterance.pitch = 0.96; // Grounded, warm, mature voice tone (not high or robotic)
+    utterance.rate = 1.0;
+    utterance.pitch = 1.0;
 
     const voice = findBestVoice(isHindi);
     if (voice) {
@@ -271,7 +277,6 @@ export const speakText = ({
 
     utterance.onstart = () => {
       onStart && onStart();
-      // Keep-alive for Chromium browsers on long utterances
       clearKeepAlive();
       keepAliveTimer = setInterval(() => {
         if (window.speechSynthesis && window.speechSynthesis.speaking) {
@@ -280,7 +285,7 @@ export const speakText = ({
         } else {
           clearKeepAlive();
         }
-      }, 9000);
+      }, 5000);
     };
 
     utterance.onend = () => {
@@ -294,15 +299,15 @@ export const speakText = ({
       handleEnd();
     };
 
-    // Retain global reference
     activeUtterance = utterance;
 
-    // Resume in case speech synthesis was in paused state
+    // Critical for Android WebView: Resume before and after speak
     if (window.speechSynthesis.paused) {
       window.speechSynthesis.resume();
     }
-
     window.speechSynthesis.speak(utterance);
+    window.speechSynthesis.resume();
+
     return utterance;
   } catch (e) {
     console.warn('TTS error:', e);
