@@ -1,10 +1,10 @@
 Add-Type -AssemblyName System.Drawing
 
-$sourceLogo = "C:\Users\hp\OneDrive\Desktop\GangaMitra-KAVAAI\frontend\src\assets\logo.png"
+$sourceLogo = "C:\Users\hp\OneDrive\Desktop\GangaMitra-KAVAAI\frontend\public\favicon.png"
 $resDir = "C:\Users\hp\OneDrive\Desktop\GangaMitra-KAVAAI\frontend\android\app\src\main\res"
 
 if (-not (Test-Path $sourceLogo)) {
-    $sourceLogo = "C:\Users\hp\OneDrive\Desktop\GangaMitra-KAVAAI\frontend\public\logo.png"
+    $sourceLogo = "C:\Users\hp\OneDrive\Desktop\GangaMitra-KAVAAI\frontend\src\assets\logo.png"
 }
 
 $srcImage = [System.Drawing.Image]::FromFile($sourceLogo)
@@ -58,4 +58,4 @@ foreach ($d in $drawableDirs) {
 }
 
 $srcImage.Dispose()
-Write-Host "All icons & splash screens successfully updated!"
+Write-Host "All Android icons and splash screens successfully updated with favicon.png!"
