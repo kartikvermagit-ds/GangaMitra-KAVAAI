@@ -3,11 +3,11 @@ import { motion } from 'framer-motion';
 import { Sparkles, Brain, Volume2, Award, HeartHandshake, Mic } from 'lucide-react';
 
 /**
- * Original Beloved Chacha Chaudhary Mascot Avatar with Vivid Talking Lip-Sync
+ * Beloved Chacha Chaudhary Mascot Avatar with Synchronized Listening & Speaking
  * Features:
- * - Perfectly positioned and animated open/close mouth with teeth & tongue
- * - Mustache frames mouth with synchronized speech vibration
- * - Active TTS audio synchronization
+ * - Reactive multi-ring audio pulse in LISTENING state with attentive head tilt
+ * - Open/close mouth with teeth & tongue + mustache speech bob in SPEAKING state
+ * - Strict real-time state badge updates
  */
 export const ChachaAvatar = ({
   state = 'idle',
@@ -32,17 +32,17 @@ export const ChachaAvatar = ({
     },
     listening: {
       text: 'Chacha is listening to you...',
-      color: 'bg-rose-100 text-rose-900 border-rose-300 ring-2 ring-rose-400/40 animate-pulse',
+      color: 'bg-rose-100 text-rose-900 border-rose-300 ring-2 ring-rose-400/50 shadow-md shadow-rose-100 animate-pulse',
       icon: Mic,
     },
     thinking: {
       text: 'Thinking faster than a computer...',
-      color: 'bg-amber-100 text-amber-900 border-amber-300 animate-pulse',
+      color: 'bg-amber-100 text-amber-900 border-amber-300 ring-2 ring-amber-300/40 shadow-sm animate-pulse',
       icon: Brain,
     },
     speaking: {
       text: 'Chacha is speaking...',
-      color: 'bg-emerald-100 text-emerald-900 border-emerald-300 shadow-sm',
+      color: 'bg-emerald-100 text-emerald-900 border-emerald-300 ring-2 ring-emerald-300/50 shadow-md shadow-emerald-100',
       icon: Volume2,
     },
     happy: {
@@ -67,10 +67,10 @@ export const ChachaAvatar = ({
         <motion.div
           initial={{ opacity: 0, y: 10, scale: 0.95 }}
           animate={{ opacity: 1, y: 0, scale: 1 }}
-          className="mb-3 max-w-xs bg-white text-slate-800 text-xs sm:text-sm font-medium px-4 py-2.5 rounded-2xl rounded-bl-none shadow-md border border-slate-100 relative z-20"
+          className="mb-3 max-w-xs bg-white text-slate-800 text-xs sm:text-sm font-medium px-4 py-2.5 rounded-2xl rounded-bl-none shadow-lg border border-slate-200/80 relative z-20"
         >
           <p className="leading-relaxed">{speechText}</p>
-          <div className="absolute -bottom-2 left-6 w-3 h-3 bg-white border-b border-r border-slate-100 transform rotate-45" />
+          <div className="absolute -bottom-2 left-6 w-3 h-3 bg-white border-b border-r border-slate-200/80 transform rotate-45" />
         </motion.div>
       )}
 
@@ -78,24 +78,24 @@ export const ChachaAvatar = ({
       <motion.div
         animate={
           state === 'listening'
-            ? { scale: [1, 1.03, 1], y: [0, -3, 0] }
+            ? { scale: [1, 1.04, 1], y: [0, -4, 0], rotate: [0, 1.5, 0, -1.5, 0] }
             : state === 'thinking'
-            ? { y: [0, -6, 0], rotate: [-1, 1, -1] }
+            ? { y: [0, -6, 0], rotate: [-1.5, 1.5, -1.5] }
             : state === 'speaking'
-            ? { scale: [1, 1.025, 1], y: [0, -2, 0] }
+            ? { scale: [1, 1.03, 1], y: [0, -3, 0] }
             : state === 'celebrating'
             ? { y: [0, -12, 0], scale: [1, 1.05, 1] }
-            : { y: [0, -5, 0] }
+            : { y: [0, -4, 0] }
         }
         transition={{
           repeat: Infinity,
           duration:
             state === 'listening'
-              ? 1.5
+              ? 1.4
               : state === 'thinking'
               ? 1.8
               : state === 'speaking'
-              ? 1.4
+              ? 1.2
               : 3.5,
           ease: 'easeInOut',
         }}
@@ -104,31 +104,47 @@ export const ChachaAvatar = ({
       >
         {/* Glow halo behind mascot */}
         <div
-          className={`absolute inset-0 rounded-full blur-2xl opacity-50 transition-all duration-500 ${
+          className={`absolute inset-0 rounded-full blur-2xl transition-all duration-500 ${
             state === 'listening'
-              ? 'bg-rose-400 scale-110'
+              ? 'bg-rose-400 opacity-70 scale-125 animate-pulse'
               : state === 'thinking'
-              ? 'bg-amber-300'
+              ? 'bg-amber-300 opacity-60 scale-110'
               : state === 'speaking'
-              ? 'bg-emerald-300 scale-105'
+              ? 'bg-emerald-400 opacity-60 scale-115'
               : state === 'celebrating'
-              ? 'bg-sacred-saffron'
-              : 'bg-ganga-300'
+              ? 'bg-sacred-saffron opacity-60 scale-110'
+              : 'bg-ganga-300 opacity-40 scale-100'
           }`}
         />
 
-        {/* Listening Concentric Waves Ring */}
+        {/* Listening Concentric Ripples */}
         {state === 'listening' && (
           <>
             <motion.div
-              animate={{ scale: [1, 1.25, 1], opacity: [0.6, 0, 0.6] }}
-              transition={{ repeat: Infinity, duration: 1.6, ease: 'easeOut' }}
-              className="absolute inset-0 rounded-full border-2 border-rose-400 pointer-events-none"
+              animate={{ scale: [0.95, 1.35, 0.95], opacity: [0.7, 0, 0.7] }}
+              transition={{ repeat: Infinity, duration: 1.5, ease: 'easeOut' }}
+              className="absolute inset-0 rounded-full border-2 border-rose-500 pointer-events-none"
             />
             <motion.div
-              animate={{ scale: [1, 1.45, 1], opacity: [0.4, 0, 0.4] }}
-              transition={{ repeat: Infinity, duration: 1.6, delay: 0.3, ease: 'easeOut' }}
+              animate={{ scale: [0.95, 1.55, 0.95], opacity: [0.5, 0, 0.5] }}
+              transition={{ repeat: Infinity, duration: 1.5, delay: 0.35, ease: 'easeOut' }}
+              className="absolute inset-0 rounded-full border border-rose-400 pointer-events-none"
+            />
+            <motion.div
+              animate={{ scale: [0.95, 1.75, 0.95], opacity: [0.3, 0, 0.3] }}
+              transition={{ repeat: Infinity, duration: 1.5, delay: 0.7, ease: 'easeOut' }}
               className="absolute inset-0 rounded-full border border-rose-300 pointer-events-none"
+            />
+          </>
+        )}
+
+        {/* Speaking Energetic Waves */}
+        {state === 'speaking' && (
+          <>
+            <motion.div
+              animate={{ scale: [1, 1.15, 1], opacity: [0.5, 0.1, 0.5] }}
+              transition={{ repeat: Infinity, duration: 1.0, ease: 'easeInOut' }}
+              className="absolute inset-0 rounded-full border-2 border-emerald-400 pointer-events-none"
             />
           </>
         )}
@@ -136,7 +152,7 @@ export const ChachaAvatar = ({
         {/* Chacha Chaudhary Mascot SVG Character Illustration */}
         <svg
           viewBox="0 0 200 200"
-          className="w-full h-full drop-shadow-xl z-10"
+          className="w-full h-full drop-shadow-2xl z-10"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
         >
@@ -146,8 +162,16 @@ export const ChachaAvatar = ({
             cy="100"
             r="92"
             fill="#F0F7FF"
-            stroke={state === 'listening' ? '#F43F5E' : state === 'speaking' ? '#10B981' : '#0284C7'}
-            strokeWidth="4"
+            stroke={
+              state === 'listening'
+                ? '#F43F5E'
+                : state === 'speaking'
+                ? '#10B981'
+                : state === 'thinking'
+                ? '#F59E0B'
+                : '#0284C7'
+            }
+            strokeWidth={state === 'listening' || state === 'speaking' ? '4.5' : '4'}
             className="transition-colors duration-300"
           />
           <circle cx="100" cy="100" r="86" fill="#FFFFFF" />
@@ -189,11 +213,13 @@ export const ChachaAvatar = ({
           <circle cx="100" cy="48" r="6" fill="#FACC15" stroke="#B45309" strokeWidth="1.5" />
           <circle cx="100" cy="48" r="2.5" fill="#0284C7" />
 
-          {/* Eyebrows */}
+          {/* Eyebrows (Attentive in listening, thoughtful in thinking) */}
           <path
             d={
               state === 'listening'
-                ? 'M76 86 Q 86 80 94 86'
+                ? 'M76 84 Q 86 78 94 84'
+                : state === 'thinking'
+                ? 'M78 86 Q 86 80 94 87'
                 : 'M78 88 Q 86 83 94 88'
             }
             stroke="#4B5563"
@@ -203,7 +229,9 @@ export const ChachaAvatar = ({
           <path
             d={
               state === 'listening'
-                ? 'M106 86 Q 114 80 124 86'
+                ? 'M106 84 Q 114 78 124 84'
+                : state === 'thinking'
+                ? 'M106 87 Q 114 80 122 86'
                 : 'M106 88 Q 114 83 122 88'
             }
             stroke="#4B5563"
@@ -214,18 +242,18 @@ export const ChachaAvatar = ({
           {/* Eyes with wise twinkling catchlights */}
           <circle
             cx="86"
-            cy={state === 'listening' ? '97' : '98'}
+            cy={state === 'listening' ? '96' : '98'}
             r={state === 'listening' ? '5.5' : '5'}
             fill="#1F2937"
           />
-          <circle cx="88" cy={state === 'listening' ? '95' : '96'} r="1.8" fill="#FFFFFF" />
+          <circle cx="88" cy={state === 'listening' ? '94' : '96'} r="1.8" fill="#FFFFFF" />
           <circle
             cx="114"
-            cy={state === 'listening' ? '97' : '98'}
+            cy={state === 'listening' ? '96' : '98'}
             r={state === 'listening' ? '5.5' : '5'}
             fill="#1F2937"
           />
-          <circle cx="116" cy={state === 'listening' ? '95' : '96'} r="1.8" fill="#FFFFFF" />
+          <circle cx="116" cy={state === 'listening' ? '94' : '96'} r="1.8" fill="#FFFFFF" />
 
           {/* Nose */}
           <ellipse cx="100" cy="108" rx="4.5" ry="6" fill="#F6AD55" />
@@ -235,7 +263,7 @@ export const ChachaAvatar = ({
           {/* ============================================================== */}
           {state === 'speaking' ? (
             <g>
-              {/* Dynamic open/close mouth cavity with natural, slower speech cadence */}
+              {/* Dynamic open/close mouth cavity */}
               <motion.ellipse
                 cx="100"
                 cy="128"
@@ -245,7 +273,7 @@ export const ChachaAvatar = ({
                 }}
                 transition={{
                   repeat: Infinity,
-                  duration: 0.55,
+                  duration: 0.5,
                   ease: 'easeInOut',
                 }}
                 fill="#7F1D1D"
@@ -261,7 +289,7 @@ export const ChachaAvatar = ({
                 rx="1"
                 fill="#FFFFFF"
                 animate={{ opacity: [0.85, 1, 0.85] }}
-                transition={{ repeat: Infinity, duration: 0.55 }}
+                transition={{ repeat: Infinity, duration: 0.5 }}
               />
               {/* Animated pink tongue */}
               <motion.ellipse
@@ -273,7 +301,7 @@ export const ChachaAvatar = ({
                 }}
                 transition={{
                   repeat: Infinity,
-                  duration: 0.55,
+                  duration: 0.5,
                   ease: 'easeInOut',
                 }}
                 fill="#FB7185"
@@ -308,7 +336,7 @@ export const ChachaAvatar = ({
                 ? { y: [0, -1, 0, -1.2, 0] }
                 : { y: 0 }
             }
-            transition={{ repeat: Infinity, duration: 0.55, ease: 'easeInOut' }}
+            transition={{ repeat: Infinity, duration: 0.5, ease: 'easeInOut' }}
           />
 
           {/* LISTENING INDICATOR OVERLAY (Microphone on ear) */}
@@ -345,27 +373,69 @@ export const ChachaAvatar = ({
         </svg>
 
         {/* Mascot Mode Badge */}
-        <div className="absolute -bottom-1 -right-1 bg-white/95 border border-slate-200 text-[10px] font-semibold text-slate-600 px-2 py-0.5 rounded-full shadow-sm flex items-center gap-1 z-20">
+        <div className="absolute -bottom-1 -right-1 bg-white/95 border border-slate-200 text-[10px] font-semibold text-slate-600 px-2.5 py-0.5 rounded-full shadow-md flex items-center gap-1.5 z-20">
           <span
-            className={`w-1.5 h-1.5 rounded-full ${
+            className={`w-2 h-2 rounded-full ${
               state === 'listening'
                 ? 'bg-rose-500 animate-ping'
                 : state === 'speaking'
                 ? 'bg-emerald-500 animate-pulse'
-                : 'bg-emerald-500'
+                : state === 'thinking'
+                ? 'bg-amber-500 animate-pulse'
+                : 'bg-ganga-500'
             }`}
           />
-          <span>{state === 'listening' ? 'Listening' : state === 'speaking' ? 'Speaking' : 'AI Mascot'}</span>
+          <span>
+            {state === 'listening'
+              ? 'Listening 🎤'
+              : state === 'speaking'
+              ? 'Speaking 🔊'
+              : state === 'thinking'
+              ? 'Thinking 🤔'
+              : 'AI Mascot'}
+          </span>
         </div>
       </motion.div>
 
       {/* State Status Tag */}
       <div
-        className={`mt-3 inline-flex items-center gap-1.5 px-3.5 py-1 rounded-full text-xs font-semibold border ${currentBadge.color} transition-all duration-300`}
+        className={`mt-3 inline-flex items-center gap-2 px-4 py-1.5 rounded-full text-xs font-bold border ${currentBadge.color} transition-all duration-300`}
       >
-        <BadgeIcon className="w-3.5 h-3.5" />
+        <BadgeIcon className="w-4 h-4 shrink-0" />
         <span>{currentBadge.text}</span>
       </div>
+
+      {/* Visual Audio Waveform Equalizer when Listening */}
+      {state === 'listening' && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="mt-2.5 flex items-center justify-center gap-1 px-3 py-1 bg-rose-50 border border-rose-200 rounded-full"
+        >
+          <span className="w-1 h-3 bg-rose-500 rounded-full animate-bounce [animation-delay:-0.3s]" />
+          <span className="w-1 h-5 bg-rose-600 rounded-full animate-bounce [animation-delay:-0.15s]" />
+          <span className="w-1 h-2.5 bg-rose-500 rounded-full animate-bounce" />
+          <span className="w-1 h-4 bg-rose-600 rounded-full animate-bounce [animation-delay:-0.25s]" />
+          <span className="w-1 h-2 bg-rose-500 rounded-full animate-bounce [animation-delay:-0.1s]" />
+          <span className="text-[10px] font-bold text-rose-700 ml-1">Live Audio Wave</span>
+        </motion.div>
+      )}
+
+      {/* Visual Audio Waveform Equalizer when Speaking */}
+      {state === 'speaking' && (
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          className="mt-2.5 flex items-center justify-center gap-1 px-3 py-1 bg-emerald-50 border border-emerald-200 rounded-full"
+        >
+          <span className="w-1 h-2 bg-emerald-500 rounded-full animate-bounce" />
+          <span className="w-1 h-4 bg-emerald-600 rounded-full animate-bounce [animation-delay:-0.2s]" />
+          <span className="w-1 h-3 bg-emerald-500 rounded-full animate-bounce [animation-delay:-0.4s]" />
+          <span className="w-1 h-5 bg-emerald-600 rounded-full animate-bounce [animation-delay:-0.1s]" />
+          <span className="w-1 h-2.5 bg-emerald-500 rounded-full animate-bounce [animation-delay:-0.3s]" />
+          <span className="text-[10px] font-bold text-emerald-700 ml-1">Voice Lip-Sync Active</span>
+        </motion.div>
+      )}
     </div>
   );
 };

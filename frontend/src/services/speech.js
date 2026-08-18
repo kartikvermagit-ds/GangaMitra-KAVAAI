@@ -21,8 +21,19 @@ if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
   };
 }
 
+// Module-level reference to prevent Chromium garbage collection of active utterance
+let activeUtterance = null;
+let keepAliveTimer = null;
+
+const clearKeepAlive = () => {
+  if (keepAliveTimer) {
+    clearInterval(keepAliveTimer);
+    keepAliveTimer = null;
+  }
+};
+
 /**
- * Creates and starts a SpeechRecognition instance with lifecycle callbacks
+ * Creates and starts a SpeechRecognition instance with strict lifecycle callbacks
  */
 export const startVoiceRecognition = ({
   language = 'en',
@@ -35,7 +46,7 @@ export const startVoiceRecognition = ({
   if (!isSpeechRecognitionSupported()) {
     onError &&
       onError(
-        'Voice input is not supported in this browser. Please use Chrome, Edge, or Brave, or type your question instead.',
+        "Voice input isn't supported in this browser. You can type your question instead.",
         'unsupported'
       );
     return null;
@@ -47,6 +58,7 @@ export const startVoiceRecognition = ({
   let accumulatedFinal = '';
   let lastInterim = '';
   let hasDispatchedResult = false;
+  let isAborted = false;
 
   recognition.continuous = false;
   recognition.interimResults = true;
@@ -58,6 +70,7 @@ export const startVoiceRecognition = ({
     accumulatedFinal = '';
     lastInterim = '';
     hasDispatchedResult = false;
+    isAborted = false;
     onStart && onStart();
   };
 
@@ -75,19 +88,16 @@ export const startVoiceRecognition = ({
 
     lastInterim = currentInterim;
 
-    if (currentInterim && onInterimResult) {
-      onInterimResult(accumulatedFinal ? `${accumulatedFinal} ${currentInterim}` : currentInterim);
-    }
-
-    if (accumulatedFinal) {
-      hasDispatchedResult = true;
-      onResult && onResult(accumulatedFinal.trim());
+    const liveText = (accumulatedFinal ? `${accumulatedFinal} ${currentInterim}` : currentInterim).trim();
+    if (liveText && onInterimResult) {
+      onInterimResult(liveText);
     }
   };
 
   recognition.onerror = (event) => {
     if (event.error === 'aborted') {
-      onEnd && onEnd(hasDispatchedResult);
+      isAborted = true;
+      onEnd && onEnd(false);
       return;
     }
 
@@ -99,19 +109,28 @@ export const startVoiceRecognition = ({
     } else if (event.error === 'audio-capture') {
       errorMsg = 'No microphone found. Please check your audio input device.';
     } else if (event.error === 'network') {
-      errorMsg = 'Speech Recognition network error: Your college/hostel firewall may be blocking Google Speech servers. Try using Google DNS (8.8.8.8 / 1.1.1.1) or type your query.';
+      errorMsg = 'Speech Recognition network error. Please check your internet connection or type your query.';
     }
 
     onError && onError(errorMsg, event.error);
   };
 
   recognition.onend = () => {
-    // If recognition ended before a final event, but we have captured interim speech, send it!
-    if (!hasDispatchedResult && lastInterim && lastInterim.trim()) {
-      hasDispatchedResult = true;
-      onResult && onResult(lastInterim.trim());
+    if (isAborted) {
+      onEnd && onEnd(false);
+      return;
     }
-    onEnd && onEnd(hasDispatchedResult);
+
+    const fullTranscript = (accumulatedFinal || lastInterim || '').trim();
+
+    // If non-empty speech was captured and not yet dispatched, send it now
+    if (!hasDispatchedResult && fullTranscript.length > 0) {
+      hasDispatchedResult = true;
+      onResult && onResult(fullTranscript);
+      onEnd && onEnd(true);
+    } else {
+      onEnd && onEnd(hasDispatchedResult);
+    }
   };
 
   try {
@@ -201,6 +220,7 @@ const sanitizeSpeechText = (raw) => {
 
 /**
  * Speaks text using window.speechSynthesis with custom Chacha tone tuning
+ * and strictly bound lifecycle events.
  */
 export const speakText = ({
   text,
@@ -216,7 +236,7 @@ export const speakText = ({
 
   try {
     // Cancel any ongoing speech to prevent overlap
-    window.speechSynthesis.cancel();
+    stopSpeaking();
 
     const cleanText = sanitizeSpeechText(text);
     if (!cleanText) {
@@ -230,7 +250,7 @@ export const speakText = ({
 
     const utterance = new SpeechSynthesisUtterance(cleanText);
     utterance.lang = isHindi ? 'hi-IN' : 'en-IN';
-    
+
     // Tone settings for a wise, warm, grandfatherly Indian mascot
     utterance.rate = isHindi ? 0.90 : 0.95; // Slightly relaxed, clear pacing
     utterance.pitch = 0.96; // Grounded, warm, mature voice tone (not high or robotic)
@@ -240,25 +260,54 @@ export const speakText = ({
       utterance.voice = voice;
     }
 
+    let hasEnded = false;
+    const handleEnd = () => {
+      if (hasEnded) return;
+      hasEnded = true;
+      clearKeepAlive();
+      activeUtterance = null;
+      onEnd && onEnd();
+    };
+
     utterance.onstart = () => {
       onStart && onStart();
+      // Keep-alive for Chromium browsers on long utterances
+      clearKeepAlive();
+      keepAliveTimer = setInterval(() => {
+        if (window.speechSynthesis && window.speechSynthesis.speaking) {
+          window.speechSynthesis.pause();
+          window.speechSynthesis.resume();
+        } else {
+          clearKeepAlive();
+        }
+      }, 9000);
     };
 
     utterance.onend = () => {
-      onEnd && onEnd();
+      handleEnd();
     };
 
     utterance.onerror = (err) => {
       if (err.error !== 'interrupted' && err.error !== 'canceled') {
         onError && onError(err);
       }
-      onEnd && onEnd();
+      handleEnd();
     };
+
+    // Retain global reference
+    activeUtterance = utterance;
+
+    // Resume in case speech synthesis was in paused state
+    if (window.speechSynthesis.paused) {
+      window.speechSynthesis.resume();
+    }
 
     window.speechSynthesis.speak(utterance);
     return utterance;
   } catch (e) {
     console.warn('TTS error:', e);
+    clearKeepAlive();
+    activeUtterance = null;
     onEnd && onEnd();
     return null;
   }
@@ -268,9 +317,15 @@ export const speakText = ({
  * Stops any ongoing SpeechSynthesis playback
  */
 export const stopSpeaking = () => {
+  clearKeepAlive();
+  activeUtterance = null;
   if (isSpeechSynthesisSupported()) {
     try {
       window.speechSynthesis.cancel();
     } catch (e) {}
   }
+};
+
+export const isSpeaking = () => {
+  return isSpeechSynthesisSupported() && window.speechSynthesis.speaking;
 };
