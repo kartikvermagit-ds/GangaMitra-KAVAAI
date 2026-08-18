@@ -1,13 +1,37 @@
 import axios from 'axios';
 
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5000/api';
+export const getApiBaseUrl = () => {
+  if (typeof window !== 'undefined') {
+    const customUrl = localStorage.getItem('gangamitra_api_url');
+    if (customUrl && customUrl.trim()) {
+      return customUrl.trim().replace(/\/+$/, '');
+    }
+  }
+  return (import.meta.env.VITE_API_URL || 'http://172.16.4.251:5000/api').replace(/\/+$/, '');
+};
+
+export const setCustomApiUrl = (url) => {
+  if (typeof window !== 'undefined') {
+    if (url && url.trim()) {
+      localStorage.setItem('gangamitra_api_url', url.trim());
+    } else {
+      localStorage.removeItem('gangamitra_api_url');
+    }
+  }
+};
 
 const apiClient = axios.create({
-  baseURL: API_BASE_URL,
+  baseURL: getApiBaseUrl(),
   headers: {
     'Content-Type': 'application/json',
   },
   timeout: 25000,
+});
+
+// Dynamic interceptor to ensure always using latest runtime URL
+apiClient.interceptors.request.use((config) => {
+  config.baseURL = getApiBaseUrl();
+  return config;
 });
 
 // Helper to extract clean error message
@@ -15,7 +39,7 @@ const handleApiError = (error) => {
   if (error.response && error.response.data) {
     return error.response.data.message || 'Server error occurred';
   } else if (error.request) {
-    return 'Chacha is taking a short break. Please check your backend connection.';
+    return `Cannot connect to backend (${getApiBaseUrl()}). Please make sure backend is running and phone is on same Wi-Fi.`;
   } else {
     return error.message || 'An unexpected error occurred';
   }
