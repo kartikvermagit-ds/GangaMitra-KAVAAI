@@ -1,37 +1,15 @@
 import axios from 'axios';
 
-export const getApiBaseUrl = () => {
-  if (typeof window !== 'undefined') {
-    const customUrl = localStorage.getItem('gangamitra_api_url');
-    if (customUrl && customUrl.trim()) {
-      return customUrl.trim().replace(/\/+$/, '');
-    }
-  }
-  return (import.meta.env.VITE_API_URL || 'http://172.16.4.251:5000/api').replace(/\/+$/, '');
-};
+const LIVE_RENDER_API = 'https://gangamitra-kavaai.onrender.com/api';
 
-export const setCustomApiUrl = (url) => {
-  if (typeof window !== 'undefined') {
-    if (url && url.trim()) {
-      localStorage.setItem('gangamitra_api_url', url.trim());
-    } else {
-      localStorage.removeItem('gangamitra_api_url');
-    }
-  }
-};
+export const API_BASE_URL = import.meta.env.VITE_API_URL || LIVE_RENDER_API;
 
 const apiClient = axios.create({
-  baseURL: getApiBaseUrl(),
+  baseURL: API_BASE_URL,
   headers: {
     'Content-Type': 'application/json',
   },
-  timeout: 25000,
-});
-
-// Dynamic interceptor to ensure always using latest runtime URL
-apiClient.interceptors.request.use((config) => {
-  config.baseURL = getApiBaseUrl();
-  return config;
+  timeout: 30000,
 });
 
 // Helper to extract clean error message
@@ -39,7 +17,7 @@ const handleApiError = (error) => {
   if (error.response && error.response.data) {
     return error.response.data.message || 'Server error occurred';
   } else if (error.request) {
-    return `Cannot connect to backend (${getApiBaseUrl()}). Please make sure backend is running and phone is on same Wi-Fi.`;
+    return 'Chacha is taking a short moment to connect to cloud brain. Please try again.';
   } else {
     return error.message || 'An unexpected error occurred';
   }
