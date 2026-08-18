@@ -1,18 +1,24 @@
+import { Capacitor } from '@capacitor/core';
+import { TextToSpeech } from '@capacitor-community/text-to-speech';
+
 /**
  * Speech Recognition and Text-to-Speech Service for GangaMitra
- * Optimized for mobile Android WebView and Web browsers with reliable audio playback.
+ * Dual-Engine:
+ * 1. Native Android TTS via @capacitor-community/text-to-speech on mobile devices
+ * 2. Web Speech API (SpeechSynthesis) on desktop browsers
  */
 
-// Check browser support
+// Check browser/platform support
 export const isSpeechRecognitionSupported = () => {
   return typeof window !== 'undefined' && ('SpeechRecognition' in window || 'webkitSpeechRecognition' in window);
 };
 
 export const isSpeechSynthesisSupported = () => {
+  if (Capacitor.isNativePlatform()) return true;
   return typeof window !== 'undefined' && 'speechSynthesis' in window;
 };
 
-// Preload and cache voices
+// Preload and cache web voices
 let cachedVoices = [];
 const loadVoices = () => {
   if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
@@ -30,9 +36,9 @@ if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
   };
 }
 
-// Module-level reference to prevent Chromium/Android garbage collection
 let activeUtterance = null;
 let keepAliveTimer = null;
+let isNativeSpeaking = false;
 
 const clearKeepAlive = () => {
   if (keepAliveTimer) {
@@ -61,14 +67,6 @@ export const startVoiceRecognition = ({
     return null;
   }
 
-  // Pre-unlock speech synthesis when mic is clicked
-  if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
-    try {
-      window.speechSynthesis.resume();
-      loadVoices();
-    } catch (e) {}
-  }
-
   const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
   const recognition = new SpeechRecognition();
 
@@ -79,7 +77,6 @@ export const startVoiceRecognition = ({
 
   recognition.continuous = false;
   recognition.interimResults = true;
-  // Match language explicitly: Hindi ('hi-IN') or Indian English ('en-IN')
   recognition.lang = language === 'hi' ? 'hi-IN' : 'en-IN';
   recognition.maxAlternatives = 3;
 
@@ -120,7 +117,7 @@ export const startVoiceRecognition = ({
 
     let errorMsg = 'Error during voice recognition';
     if (event.error === 'not-allowed' || event.error === 'permission-denied') {
-      errorMsg = 'Microphone permission denied. Please allow microphone access in your browser/app settings.';
+      errorMsg = 'Microphone permission denied. Please allow microphone access in your app/browser settings.';
     } else if (event.error === 'no-speech') {
       errorMsg = 'No voice detected. Please speak closer to your microphone.';
     } else if (event.error === 'audio-capture') {
@@ -165,7 +162,7 @@ export const startVoiceRecognition = ({
 };
 
 /**
- * Finds best voice for authentic Indian avatar
+ * Finds best voice for authentic Indian avatar on Web
  */
 const findBestVoice = (isHindi) => {
   if (cachedVoices.length === 0) {
@@ -230,16 +227,58 @@ const sanitizeSpeechText = (raw) => {
 };
 
 /**
- * Speaks text using window.speechSynthesis with Android & Chrome compatibility
+ * Speaks text using Native Android TTS on Mobile or Web SpeechSynthesis on Web
  */
-export const speakText = ({
+export const speakText = async ({
   text,
   language = 'en',
   onStart,
   onEnd,
   onError,
 }) => {
-  if (!isSpeechSynthesisSupported() || !text) {
+  if (!text) {
+    onEnd && onEnd();
+    return null;
+  }
+
+  const cleanText = sanitizeSpeechText(text);
+  if (!cleanText) {
+    onEnd && onEnd();
+    return null;
+  }
+
+  const containsDevanagari = /[\u0900-\u097F]/.test(cleanText);
+  const isHindi = language === 'hi' || containsDevanagari;
+  const langCode = isHindi ? 'hi-IN' : 'en-IN';
+
+  // 1. Native Mobile Platform (Android / iOS): Use Native TextToSpeech Engine
+  if (Capacitor.isNativePlatform()) {
+    try {
+      stopSpeaking();
+      isNativeSpeaking = true;
+      onStart && onStart();
+
+      await TextToSpeech.speak({
+        text: cleanText,
+        lang: langCode,
+        rate: 1.0,
+        pitch: 1.0,
+        volume: 1.0,
+        category: 'ambient',
+      });
+
+      isNativeSpeaking = false;
+      onEnd && onEnd();
+      return true;
+    } catch (nativeErr) {
+      console.warn('Native TTS error, attempting fallback:', nativeErr);
+      isNativeSpeaking = false;
+      // Fallback to web synthesis if native fails
+    }
+  }
+
+  // 2. Web Browser Fallback (Chrome, Edge, Safari)
+  if (!isSpeechSynthesisSupported()) {
     onEnd && onEnd();
     return null;
   }
@@ -247,17 +286,8 @@ export const speakText = ({
   try {
     stopSpeaking();
 
-    const cleanText = sanitizeSpeechText(text);
-    if (!cleanText) {
-      onEnd && onEnd();
-      return null;
-    }
-
-    const containsDevanagari = /[\u0900-\u097F]/.test(cleanText);
-    const isHindi = language === 'hi' || containsDevanagari;
-
     const utterance = new SpeechSynthesisUtterance(cleanText);
-    utterance.lang = isHindi ? 'hi-IN' : 'en-IN';
+    utterance.lang = langCode;
     utterance.rate = 1.0;
     utterance.pitch = 1.0;
 
@@ -301,7 +331,6 @@ export const speakText = ({
 
     activeUtterance = utterance;
 
-    // Critical for Android WebView: Resume before and after speak
     if (window.speechSynthesis.paused) {
       window.speechSynthesis.resume();
     }
@@ -310,7 +339,7 @@ export const speakText = ({
 
     return utterance;
   } catch (e) {
-    console.warn('TTS error:', e);
+    console.warn('Web TTS error:', e);
     clearKeepAlive();
     activeUtterance = null;
     onEnd && onEnd();
@@ -324,7 +353,15 @@ export const speakText = ({
 export const stopSpeaking = () => {
   clearKeepAlive();
   activeUtterance = null;
-  if (isSpeechSynthesisSupported()) {
+
+  if (Capacitor.isNativePlatform()) {
+    try {
+      TextToSpeech.stop();
+      isNativeSpeaking = false;
+    } catch (e) {}
+  }
+
+  if (typeof window !== 'undefined' && 'speechSynthesis' in window) {
     try {
       window.speechSynthesis.cancel();
     } catch (e) {}
@@ -332,5 +369,6 @@ export const stopSpeaking = () => {
 };
 
 export const isSpeaking = () => {
-  return isSpeechSynthesisSupported() && window.speechSynthesis.speaking;
+  if (Capacitor.isNativePlatform()) return isNativeSpeaking;
+  return typeof window !== 'undefined' && 'speechSynthesis' in window && window.speechSynthesis.speaking;
 };
